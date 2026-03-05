@@ -1,0 +1,11 @@
+{
+    "agents": [
+        "copilot"
+    ],
+    "skills": [
+        "wayfinder-development",
+        "pest-testing",
+        "inertia-vue-development",
+        "tailwindcss-development"
+    ]
+}

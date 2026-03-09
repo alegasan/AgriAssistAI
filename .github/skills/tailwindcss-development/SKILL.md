@@ -126,6 +126,27 @@ If existing pages and components support dark mode, new pages and components mus
 </div>
 ```
 
+### Lucide Icons
+
+Use Lucide for icons in Vue components. Prefer importing from `lucide-vue-next` and size icons with Tailwind width/height utilities. Keep icons aligned with text using flex and `items-center`.
+
+If `lucide-vue-next` is not listed in `package.json`, add it before using icons.
+
+<!-- Lucide Icons -->
+
+```vue
+<script setup lang="ts">
+import { Leaf } from "lucide-vue-next";
+</script>
+
+<template>
+    <span class="inline-flex items-center gap-2 text-emerald-600">
+        <Leaf class="h-4 w-4" />
+        Healthy
+    </span>
+</template>
+```
+
 ## Common Pitfalls
 
 - Using deprecated v3 utilities (bg-opacity-_, flex-shrink-_, etc.)
@@ -133,6 +154,7 @@ If existing pages and components support dark mode, new pages and components mus
 - Trying to use `tailwind.config.js` instead of CSS `@theme` directive
 - Using margins for spacing between siblings instead of gap utilities
 - Forgetting to add dark mode variants when the project uses dark mode
+- Using inline SVGs when Lucide icons are already available and consistent
 
 ## Project Theme Guidelines (PlantGuard AI)
 

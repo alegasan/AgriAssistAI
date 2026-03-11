@@ -6,6 +6,10 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\DiagnoseController;
+use App\Http\Controllers\Client\ReportController;
+use App\Http\Controllers\Client\SupportController;
+use App\Http\Controllers\Client\KnowledgeHubController;
+use App\Http\Controllers\Client\ProfileController;
 
 Route::inertia('/', 'Welcome')->name('home');
 
@@ -33,4 +37,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/client/diagnose', [DiagnoseController::class, 'index'])
         ->middleware('client')
         ->name('client.diagnose');
+    Route::get('/client/reports', [ReportController::class, 'index'])
+        ->middleware('client')
+        ->name('client.reports');
+    Route::get('/client/support', [SupportController::class, 'index'])
+        ->middleware('client')
+        ->name('client.support');
+    Route::get('/client/knowledgehub', [KnowledgeHubController::class, 'index'])
+        ->middleware('client')
+        ->name('client.knowledgehub');
+
+    Route::get('/client/profile/{user}', [ProfileController::class, 'show'])
+        ->middleware('client')
+        ->name('client.profile');
 });

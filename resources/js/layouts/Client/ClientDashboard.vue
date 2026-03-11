@@ -19,10 +19,11 @@ const props = defineProps<{
     <Head :title="props.title" />
     <ClientNavbar />
 
-    <main class="mx-auto w-full max-w-6xl px-4 pb-16 pt-8">
-      <h3 class="text-3xl font-bold text-slate-900">{{ props.title }}</h3>
-      <p class="mt-2 text-muted-foreground text-slate-700">{{ props.description }}</p>
+    <main class="mx-auto w-full max-w-6xl px-2 pb-16 pt-6">
+      <h3 class="text-2xl font-bold text-slate-900">{{ props.title }}</h3>
+      <p class="mt-1 text-muted-foreground text-slate-700">{{ props.description }}</p>
     </main>
+    <slot />
   </div>
 
 </template>

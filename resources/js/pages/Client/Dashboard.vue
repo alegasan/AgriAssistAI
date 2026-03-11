@@ -54,13 +54,14 @@ import QuickActionsCard from "@/components/Client/QuickActionsCard.vue";
 
                 <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <QuickActionsCard title="New Diagnosis" description="Submit a new plant diagnosis" :icon="Camera"
-                        :class="' bg-emerald-100 text-emerald-700'" />
-                    <QuickActionsCard title="My Diagnoses" description="View your past diagnoses and results"
-                        :icon="FileText" :class="' bg-amber-100 text-slate-700'" />
-                    <QuickActionsCard title="Disease Library" description="Browse the disease knowledge base"
-                        :icon="BookOpen" :class="' bg-blue-100 text-slate-700'" />
+                        href="/client/diagnose" :class="' bg-emerald-300 text-emerald-700'" />
+                    <QuickActionsCard title="My Reports" description="View your past diagnoses and results"
+                        :icon="FileText" href="/client/reports" :class="' bg-orange-300 text-slate-700'" />
                     <QuickActionsCard title="Support" description="Contact our support team for help"
-                        :icon="MessageCircle" :class="' bg-orange-100 text-slate-700'" />
+                        :icon="MessageCircle" href="/client/support" :class="' bg-purple-300 text-slate-700'" />
+                    <QuickActionsCard title="Knowledge Hub" description="Browse the disease knowledge base"
+                        :icon="BookOpen" href="/client/knowledgehub" :class="' bg-green-300 text-slate-700'" />
+
                 </div>
             </section>
 

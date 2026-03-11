@@ -1,13 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Client\ClientDashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Client\DiagnoseController;
 
 Route::inertia('/', 'Welcome')->name('home');
 
-Route::middleware('guest')->group(function () {
+
     Route::get('/login', [LoginController::class, 'showLoginForm'])
         ->name('login');
     Route::post('/login', [LoginController::class, 'login'])
@@ -18,9 +20,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'register'])
         ->name('register.store')
         ->middleware('throttle:register');
-});
+
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('admin')
+        ->name('admin.dashboard');
+    Route::get('/client/dashboard', [ClientDashboardController::class, 'index'])
+        ->middleware('client')
+        ->name('client.dashboard');
+    Route::get('/client/diagnose', [DiagnoseController::class, 'index'])
+        ->middleware('client')
+        ->name('client.diagnose');
 });

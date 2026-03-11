@@ -21,8 +21,13 @@ class LoginController extends Controller
 
         if (auth()->attempt([$loginField => $credentials['login'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
+            $user = auth()->user();
 
-            return redirect()->route('dashboard');
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            return redirect()->route('client.dashboard');
         }
 
         return back()->withErrors([

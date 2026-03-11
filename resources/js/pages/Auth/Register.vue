@@ -47,7 +47,7 @@ const submit = () => {
             class="absolute left-6 top-6 z-10 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 hover:text-emerald-800"
         >
             <span aria-hidden="true">←</span>
-            Back to welcome
+            Back 
         </Link>
         <div class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
         <div class="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-emerald-100/70 blur-3xl" />

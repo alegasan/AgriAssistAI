@@ -2,14 +2,15 @@
 import { Bell, Leaf } from "lucide-vue-next"
 import { useForm } from "@inertiajs/vue3";
 import AlertDialog from "@/components/AlertDialog.vue"
+import { Link } from "@inertiajs/vue3"
 const navItems = [
-    { label: 'Dashboard', active: true },
-    { label: 'Users', active: false },
-    { label: 'Diseases', active: false },
-    { label: 'Diagnoses', active: false },
+    { label: 'Dashboard', routeName: 'admin.dashboard', href: route('admin.dashboard') },
+    { label: 'Users', routeName: 'admin.users.index', href: route('admin.users.index') },
+    { label: 'Diseases', routeName: 'admin.diseases.index', href: route('admin.diseases.index') },
+    { label: 'Diagnoses', routeName: 'admin.diagnoses.index', href: route('admin.diagnoses.index') },
 ]
 import { route } from "ziggy-js";
-
+const isActive = (routeName?: string) => (routeName ? route().current(routeName) : false)
 const logoutForm = useForm()
 const handleLogout = () => {
     logoutForm.post(route('logout'))
@@ -23,19 +24,17 @@ const handleLogout = () => {
                 <div class="grid h-10 w-10 place-items-center rounded-full bg-emerald-600 text-white">
                     <Leaf class="h-5 w-5" aria-hidden="true" />
                 </div>
-                <p class="text-base font-semibold text-slate-900">PlantGuard AI</p>
+                <p class="text-base font-semibold text-slate-900">AgriAssist AI</p>
             </div>
 
-            <nav class="flex items-center gap-2 rounded-full bg-emerald-50 px-2 py-1 text-sm font-medium text-slate-600">
-                <button
-                    v-for="item in navItems"
-                    :key="item.label"
-                    type="button"
-                    class="rounded-full px-4 py-2 transition"
-                    :class="item.active ? 'bg-white text-emerald-700 shadow-sm' : 'hover:text-emerald-700'"
-                >
+            <nav 
+            class="flex items-center gap-2 rounded-full bg-emerald-50 px-2 py-1 text-sm font-medium text-slate-600">
+                
+             <component v-for="item in navItems" :is="item.href ? Link : 'button'" :key="item.label"
+                    :href="item.href" type="button" class="rounded-full px-4 py-2 transition"
+                    :class="isActive(item.routeName) ? 'bg-white text-emerald-700 shadow-sm' : 'hover:text-emerald-700'">
                     {{ item.label }}
-                </button>
+                </component>
             </nav>
 
             <div class="flex items-center gap-3">

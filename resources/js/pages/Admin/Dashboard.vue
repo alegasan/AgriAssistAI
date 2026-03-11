@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import {
-    AlertCircle,
     Biohazard,
     ClipboardList,
     Clock,
@@ -9,6 +8,15 @@ import {
 } from "lucide-vue-next"
 import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
 import CardInfo from "@/components/CardInfo.vue";
+
+defineProps<{
+    stats: {
+        farmers:   { total: number; new_today: number }
+        diseases:  { total: number; new_today: number }
+        diagnoses: { total: number; new_today: number }
+        pending:   { total: number; new_today: number }
+    }
+}>()
 </script>
 
 
@@ -17,7 +25,7 @@ import CardInfo from "@/components/CardInfo.vue";
     <AdminDashboard :title="'Admin Dashboard'" :description="'Heres an overview of the latest stats and activity on PlantGuard AI.'">
 
         <div class="mt-8 grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-            <CardInfo title="Total Users" value="1,284" change="+12" description="Total registered farmers" :icon="Users" />
+            <CardInfo title="Total Users" :value="stats.farmers.total.toLocaleString()"  :change="`+${stats.farmers.new_today ?? 0}`" description="Total registered farmers" :icon="Users" />
             <CardInfo title="Active Diseases" value="47" change="+3" description="Diseases in knowledge base" :icon="Biohazard" />
             <CardInfo title="Total Diagnoses" value="8,432" change="+47" description="Diagnoses submitted by farmers" :icon="ClipboardList" />
             <CardInfo title="Pending Reviews" value="89" change="+5" description="Diagnoses awaiting expert review" :icon="Clock" />

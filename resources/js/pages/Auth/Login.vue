@@ -35,6 +35,13 @@ const submit = () => {
 <template>
   <Head title="Login" />
   <div class="relative min-h-screen overflow-hidden bg-[#f8faf9] font-sans">
+    <Link
+      href="/"
+      class="absolute left-6 top-6 z-10 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 hover:text-emerald-800"
+    >
+      <span aria-hidden="true">←</span>
+      Back to welcome
+    </Link>
     <div class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
     <div class="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-emerald-100/70 blur-3xl" />
 
@@ -42,7 +49,7 @@ const submit = () => {
       <div class="grid w-full items-center gap-10 lg:grid-cols-2">
         <div class="hidden space-y-5 lg:block">
           <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100/60 px-3 py-1 text-xs font-semibold text-emerald-700">
-            Welcome Back to PlantGuard
+            Welcome Back to AgriAssist AI
           </span>
           <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 xl:text-5xl">
             Keep your crops protected with every login.

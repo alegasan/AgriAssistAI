@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\SocialAuthController;
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
@@ -30,6 +31,11 @@ Route::inertia('/', 'Welcome')->name('home');
     Route::post('/register', [RegisterController::class, 'register'])
         ->name('register.store')
         ->middleware('throttle:register');
+
+    Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])
+        ->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
+        ->name('auth.google.callback');
 
 
 Route::middleware('auth')->group(function () {

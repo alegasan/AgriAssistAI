@@ -196,8 +196,12 @@ const submit = () => {
                     </CardContent>
 
                     <CardFooter class="flex flex-col gap-2 pt-0">
-                        <Button variant="outline" class="w-full rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50">
-                            Sign up with Google
+                        <Button
+                            as-child
+                            variant="outline"
+                            class="w-full rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                            <a :href="route('auth.google.redirect')">Sign up with Google</a>
                         </Button>
                         <p class="pt-1 text-center text-xs text-slate-500">
                             By signing up, you agree to our Terms and Privacy Policy.

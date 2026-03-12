@@ -147,8 +147,12 @@ const submit = () => {
             >
               {{ form.processing ? 'Logging in...' : 'Login' }}
             </Button>
-            <Button variant="outline" class="w-full rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50">
-              Login with Google
+            <Button
+              as-child
+              variant="outline"
+              class="w-full rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <a :href="route('auth.google.redirect')">Login with Google</a>
             </Button>
           </CardFooter>
         </Card>

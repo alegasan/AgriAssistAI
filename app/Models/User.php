@@ -55,4 +55,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected $appends = ['created_at_formatted'];
+
+    public function getCreatedAtFormattedAttribute(): ?string
+    {
+        return $this->created_at?->format('M d, Y');
+    }
 }

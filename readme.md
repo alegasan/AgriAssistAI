@@ -29,7 +29,7 @@ There are **two distinct portals**:
 
 | Portal | URL Prefix | Who |
 |--------|-----------|-----|
-| User Portal | `/app/*` | Regular users who upload and view diagnoses |
+| User Portal | `/client/*` | Regular users who upload and view diagnoses |
 | Admin Portal | `/admin/*` | Admins who manage users, diseases, and all diagnoses |
 
 ---
@@ -84,14 +84,14 @@ A privileged account that manages the platform and its users.
 
 ## Features
 
-### User Portal (`/app`)
+### User Portal (`/client`)
 
 | Page | Route | Description |
 |------|-------|-------------|
-| Dashboard | `/app/dashboard` | Personal stats: total diagnoses, recent activity |
-| Diagnose | `/app/diagnose` | Upload plant photo → get AI result |
-| History | `/app/history` | List of all past diagnoses |
-| Result | `/app/result/{id}` | Detailed diagnosis result page |
+| Dashboard | `/client/dashboard` | Personal stats: total diagnoses, recent activity |
+| Diagnose | `/client/diagnose` | Upload plant photo → get AI result |
+| History | `/client/history` | List of all past diagnoses |
+| Result | `/client/result/{id}` | Detailed diagnosis result page |
 
 ### Admin Portal (`/admin`)
 
@@ -237,12 +237,14 @@ GET  /register                  → Auth/Register.vue     [guest]
 POST /register                  → create user (role: user)
 POST /logout                    → logout                [auth]
 
-# User Routes  [middleware: auth, role:user]
-GET  /app/dashboard             → User/Dashboard.vue
-GET  /app/diagnose              → User/Diagnose.vue
-POST /app/diagnose              → DiagnosisController@store → AI call → save
-GET  /app/history               → User/History.vue
-GET  /app/result/{diagnosis}    → User/Result.vue
+# User Routes  [middleware: auth, client]
+GET  /client/dashboard          → ClientDashboardController@index
+GET  /client/diagnose           → DiagnoseController@index
+POST /client/diagnose           → DiagnoseController@store → AI call → save
+GET  /client/reports            → ReportController@index
+GET  /client/support            → SupportController@index
+GET  /client/knowledgehub       → KnowledgeHubController@index
+GET  /client/profile/{user}     → ProfileController@show
 
 # Admin Routes  [middleware: auth, role:admin]
 GET  /admin/dashboard           → Admin/Dashboard.vue
@@ -279,15 +281,14 @@ Auth is handled entirely by two plain controllers — **no Laravel Breeze, no st
 
 After login, users are redirected automatically:
 - **Admin** → `/admin/dashboard`
-- **User** → `/app/dashboard`
+- **User** → `/client/dashboard`
 
 ### Middleware Stack
 
 | Middleware | Alias | Purpose |
 |-----------|-------|---------|
-| `RoleMiddleware` | `role:admin` / `role:user` | Redirects to correct portal if role mismatch |
-| `AdminMiddleware` | `admin` | Hard 403 for non-admins |
-| `EnsureUserIsActive` | *(global)* | Auto-logs out deactivated users on next request |
+| `EnsureAdmin` | `admin` | Restricts admin routes |
+| `EnsureClient` | `client` | Restricts client routes |
 | `HandleInertiaRequests` | *(global)* | Shares `auth.user`, `flash`, Ziggy to all Vue pages |
 
 ### Using roles in Vue components

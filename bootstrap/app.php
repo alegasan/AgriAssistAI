@@ -39,7 +39,12 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             
-            $errorKey = $request->routeIs('login.*') ? 'login' : 'email';
+            $errorKey = match (true) {
+                $request->routeIs('login.*') => 'login',
+                $request->routeIs('register.*') => 'email',
+                $request->routeIs('client.diagnose.store') => 'image',
+                default => 'email',
+            };
 
             return back()
                 ->withInput($request->except(['password', 'password_confirmation']))

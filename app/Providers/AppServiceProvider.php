@@ -63,6 +63,19 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('register', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip().'|'.$request->input('email'));
         });
+
+        RateLimiter::for('diagnose-upload', function (Request $request) {
+            $maxAttempts = max(1, (int) config('services.diagnose_uploads.rate_limit_per_minute', 10));
+            $limits = [
+                Limit::perMinute($maxAttempts)->by('diagnose:ip:'.$request->ip()),
+            ];
+
+            if ($request->user() !== null) {
+                $limits[] = Limit::perMinute($maxAttempts)->by('diagnose:user:'.$request->user()->id);
+            }
+
+            return $limits;
+        });
         
     }
 

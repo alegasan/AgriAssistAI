@@ -41,4 +41,15 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+    ],
+
+    'diagnose_uploads' => [
+        'disk' => env('DIAGNOSE_UPLOAD_DISK', 'local'),
+        'rate_limit_per_minute' => (int) env('DIAGNOSE_UPLOAD_RATE_LIMIT_PER_MINUTE', 10),
+        'max_user_storage_mb' => (int) env('DIAGNOSE_MAX_USER_STORAGE_MB', 50),
+    ],
+
 ];

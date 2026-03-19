@@ -2,16 +2,18 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
-import { Camera, ChevronDown, Image as ImageIcon, Upload } from 'lucide-vue-next'
+import { Camera, ChevronDown, Image as ImageIcon, LoaderCircle, RefreshCw, Upload } from 'lucide-vue-next'
 import ClientDashboard from '@/layouts/Client/ClientDashboard.vue'
 
 type DiagnosisResult = {
     id: number
+    status: 'pending' | 'processing' | 'completed' | 'failed'
     plant_name: string | null
     disease_name: string | null
     confidence_score: string | number | null
     symptoms: string | null
     treatment: string | null
+    failure_reason?: string | null
     image_url: string
 }
 
@@ -22,7 +24,11 @@ const isLoading = ref(false)
 const analysisProgress = ref(0)
 const progressInterval = ref<number | null>(null)
 const hideLoadingTimeout = ref<number | null>(null)
+const diagnosisPollingInterval = ref<number | null>(null)
 const submitHasErrors = ref(false)
+const pollingStartedAt = ref<number | null>(null)
+const elapsedSeconds = ref(0)
+const elapsedInterval = ref<number | null>(null)
 
 const form = useForm<{
     image: File | null
@@ -41,13 +47,142 @@ const flash = computed(() => {
 })
 
 const diagnosis = ref<DiagnosisResult | null>(null)
+const diagnosisStatus = computed(() => diagnosis.value?.status ?? null)
+const diagnosisStatusTitle = computed(() => {
+    if (diagnosisStatus.value === 'processing') {
+        return 'Analysis in progress'
+    }
+
+    if (diagnosisStatus.value === 'pending') {
+        return 'Diagnosis queued'
+    }
+
+    return ''
+})
+
+const diagnosisStatusDescription = computed(() => {
+    if (diagnosisStatus.value === 'processing') {
+        return 'Gemini is analyzing your image. This can take a few moments.'
+    }
+
+    if (diagnosisStatus.value === 'pending') {
+        return 'Your request is waiting for an available worker to start processing.'
+    }
+
+    return ''
+})
+
+const elapsedLabel = computed(() => {
+    const minutes = Math.floor(elapsedSeconds.value / 60)
+    const seconds = elapsedSeconds.value % 60
+
+    if (minutes < 1) {
+        return `${seconds}s`
+    }
+
+    return `${minutes}m ${seconds}s`
+})
+
+const isDiagnosisStuck = computed(() => {
+    if (!pollingStartedAt.value) {
+        return false
+    }
+
+    if (diagnosisStatus.value !== 'pending' && diagnosisStatus.value !== 'processing') {
+        return false
+    }
+
+    return Date.now() - pollingStartedAt.value > 30000
+})
 const diagnosisError = computed(() => (form.errors as Record<string, string | undefined>).diagnosis)
+
+const stopDiagnosisPolling = (): void => {
+    if (diagnosisPollingInterval.value !== null) {
+        window.clearInterval(diagnosisPollingInterval.value)
+        diagnosisPollingInterval.value = null
+    }
+
+    if (elapsedInterval.value !== null) {
+        window.clearInterval(elapsedInterval.value)
+        elapsedInterval.value = null
+    }
+
+    pollingStartedAt.value = null
+    elapsedSeconds.value = 0
+}
+
+const applyDiagnosisState = (incomingDiagnosis: DiagnosisResult): void => {
+    diagnosis.value = incomingDiagnosis
+
+    if (incomingDiagnosis.status === 'completed') {
+        stopDiagnosisPolling()
+        finishLoadingProgress()
+        return
+    }
+
+    if (incomingDiagnosis.status === 'failed') {
+        stopDiagnosisPolling()
+        cancelLoadingProgress()
+    }
+}
+
+const fetchDiagnosisStatus = async (diagnosisId: number): Promise<void> => {
+    try {
+        const response = await window.fetch(route('client.diagnose.status', diagnosisId), {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        })
+
+        if (!response.ok) {
+            if (response.status === 403 || response.status === 404) {
+                stopDiagnosisPolling()
+                cancelLoadingProgress()
+            }
+
+            return
+        }
+
+        const payload = (await response.json()) as DiagnosisResult
+        applyDiagnosisState(payload)
+    } catch {
+        // Polling is best effort. Keep trying until success or final state.
+    }
+}
+
+const startDiagnosisPolling = (diagnosisId: number): void => {
+    stopDiagnosisPolling()
+    pollingStartedAt.value = Date.now()
+    elapsedSeconds.value = 0
+
+    elapsedInterval.value = window.setInterval(() => {
+        elapsedSeconds.value += 1
+    }, 1000)
+
+    diagnosisPollingInterval.value = window.setInterval(() => {
+        void fetchDiagnosisStatus(diagnosisId)
+    }, 2000)
+}
+
+const refreshDiagnosisStatus = (): void => {
+    if (diagnosis.value) {
+        void fetchDiagnosisStatus(diagnosis.value.id)
+    }
+}
 
 watch(
     () => flash.value.diagnosis,
     (incomingDiagnosis) => {
         if (incomingDiagnosis) {
-            diagnosis.value = incomingDiagnosis
+            applyDiagnosisState(incomingDiagnosis)
+
+            if (incomingDiagnosis.status === 'pending' || incomingDiagnosis.status === 'processing') {
+                void fetchDiagnosisStatus(incomingDiagnosis.id)
+                startDiagnosisPolling(incomingDiagnosis.id)
+            }
         }
     },
     { immediate: true },
@@ -169,9 +304,13 @@ const submit = (): void => {
             setImagePreview(null)
         },
         onFinish: () => {
-            if (!submitHasErrors.value) {
-                finishLoadingProgress()
+            if (submitHasErrors.value) {
+                cancelLoadingProgress()
+                return
             }
+
+            // Upload completed: close blocking modal and continue status updates inline.
+            finishLoadingProgress()
         },
     })
 }
@@ -183,6 +322,7 @@ onBeforeUnmount(() => {
 
     clearProgressInterval()
     clearHideLoadingTimeout()
+    stopDiagnosisPolling()
 })
 </script>
 
@@ -308,7 +448,7 @@ onBeforeUnmount(() => {
                         class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-300 px-4 py-3.5 text-sm font-bold text-white shadow-[0_12px_30px_-18px_rgba(5,150,105,0.9)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <Upload class="h-4 w-4" />
-                        {{ form.processing ? 'Analyzing Image...' : 'Analyze Crop' }}
+                        {{ form.processing ? 'Uploading Image...' : 'Analyze Crop' }}
                     </button>
                 </form>
             </section>
@@ -325,7 +465,48 @@ onBeforeUnmount(() => {
                     {{ flash.error }}
                 </p>
 
-                <div v-if="diagnosis" class="mt-4 space-y-4">
+                <div v-if="diagnosis && (diagnosisStatus === 'pending' || diagnosisStatus === 'processing')" class="mt-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-4 text-sm text-amber-900 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                                <LoaderCircle class="h-4 w-4 animate-spin" />
+                            </span>
+                            <div>
+                                <p class="font-semibold">{{ diagnosisStatusTitle }}</p>
+                                <p class="mt-1 text-amber-800">{{ diagnosisStatusDescription }}</p>
+                                <p class="mt-2 text-xs font-medium text-amber-700">Elapsed: {{ elapsedLabel }}</p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center gap-1 rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-50"
+                            @click="refreshDiagnosisStatus"
+                        >
+                            <RefreshCw class="h-3.5 w-3.5" />
+                            Refresh
+                        </button>
+                    </div>
+
+                    <div v-if="isDiagnosisStuck" class="mt-3 rounded-lg border border-amber-300 bg-amber-100/70 p-3 text-amber-900">
+                        <p class="font-semibold">Processing is taking longer than expected.</p>
+                        <p class="mt-1 text-sm">Queue worker may not be running. Start <span class="font-mono">php artisan queue:work</span> and then click refresh below.</p>
+                        <button
+                            type="button"
+                            class="mt-3 inline-flex items-center justify-center rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-50"
+                            @click="refreshDiagnosisStatus"
+                        >
+                            Refresh status
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="diagnosis && diagnosisStatus === 'failed'" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                    <p class="font-semibold">Diagnosis failed</p>
+                    <p class="mt-1">{{ diagnosis.failure_reason || 'Please try again in a moment.' }}</p>
+                </div>
+
+                <div v-if="diagnosis && diagnosisStatus === 'completed'" class="mt-4 space-y-4">
                     <img
                         :src="diagnosis.image_url"
                         alt="Diagnosed plant"
@@ -356,7 +537,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div v-else class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
+                <div v-if="!diagnosis" class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
                     No diagnosis yet. Upload an image to generate your first analysis.
                 </div>
             </section>

@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/client/diagnose', [DiagnoseController::class, 'store'])
             ->middleware('throttle:diagnose-upload')
             ->name('client.diagnose.store');
+        Route::get('/client/diagnose/{diagnosis}/status', [DiagnoseController::class, 'status'])
+            ->name('client.diagnose.status');
         Route::get('/client/diagnose/{diagnosis}/image', [DiagnoseController::class, 'image'])
             ->name('client.diagnose.image');
         Route::get('/client/reports', [ReportController::class, 'index'])

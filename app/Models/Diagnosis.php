@@ -10,14 +10,23 @@ class Diagnosis extends Model
 {
     use HasFactory;
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_FAILED = 'failed';
+
     protected $fillable = [
         'user_id',
         'image_path',
+        'status',
         'plant_name',
         'disease_name',
         'confidence_score',
         'symptoms',
         'treatment',
+        'failure_reason',
+        'attempted_at',
+        'completed_at',
         'raw_ai_response',
     ];
 
@@ -26,6 +35,8 @@ class Diagnosis extends Model
         return [
             'raw_ai_response' => 'array',
             'confidence_score' => 'decimal:2',
+            'attempted_at' => 'datetime',
+            'completed_at' => 'datetime',
         ];
     }
 

@@ -79,6 +79,7 @@ Use Wayfinder with the `<Form>` component:
 1. Run `php artisan wayfinder:generate` to regenerate routes if Vite plugin isn't installed
 2. Check TypeScript imports resolve correctly
 3. Verify route URLs match expected paths
+4. When introducing status or polling endpoints, regenerate route helpers immediately and validate method-specific helpers (`.get`, `.url`) against expected signatures
 
 ## Common Pitfalls
 

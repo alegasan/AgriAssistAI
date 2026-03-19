@@ -23,7 +23,7 @@
 
 ## Overview
 
-PlantDoc allows users to **upload a photo of a plant**, and the system diagnoses potential diseases using AI (OpenAI Vision API). Results include the disease name, confidence score, symptoms, and treatment recommendations.
+PlantDoc allows users to **upload a photo of a plant**, and the system diagnoses potential diseases using AI (Gemini Vision API). Upload requests return quickly, and diagnosis processing runs in a background queue with live status polling.
 
 There are **two distinct portals**:
 
@@ -44,7 +44,7 @@ There are **two distinct portals**:
 | Styling | Tailwind CSS |
 | Auth | Custom RBAC (no Breeze) |
 | Database | MySQL |
-| AI Diagnosis | OpenAI GPT-4o Vision API |
+| AI Diagnosis | Google Gemini generateContent API |
 | Route Helpers | Ziggy |
 
 ---
@@ -89,7 +89,7 @@ A privileged account that manages the platform and its users.
 | Page | Route | Description |
 |------|-------|-------------|
 | Dashboard | `/client/dashboard` | Personal stats: total diagnoses, recent activity |
-| Diagnose | `/client/diagnose` | Upload plant photo → get AI result |
+| Diagnose | `/client/diagnose` | Upload plant photo → queue analysis and track status |
 | History | `/client/history` | List of all past diagnoses |
 | Result | `/client/result/{id}` | Detailed diagnosis result page |
 
@@ -208,6 +208,10 @@ plantdoc/
 | confidence_score | decimal | 0.00–100.00 |
 | symptoms | text | from AI |
 | treatment | text | from AI |
+| status | string | `pending` \| `processing` \| `completed` \| `failed` |
+| failure_reason | text | nullable, populated when AI processing fails |
+| attempted_at | timestamp | nullable, latest queue attempt time |
+| completed_at | timestamp | nullable, successful completion time |
 | raw_ai_response | json | full API response |
 | timestamps | | |
 
@@ -240,7 +244,8 @@ POST /logout                    → logout                [auth]
 # User Routes  [middleware: auth, client]
 GET  /client/dashboard          → ClientDashboardController@index
 GET  /client/diagnose           → DiagnoseController@index
-POST /client/diagnose           → DiagnoseController@store → AI call → save
+POST /client/diagnose           → DiagnoseController@store → create pending + dispatch queue job
+GET  /client/diagnose/{id}/status → DiagnoseController@status → polling endpoint
 GET  /client/reports            → ReportController@index
 GET  /client/support            → SupportController@index
 GET  /client/knowledgehub       → KnowledgeHubController@index
@@ -267,6 +272,27 @@ GET  /admin/diagnoses/{id}      → Admin/Diagnoses/Show.vue
 ```
 
 ---
+
+## Async Diagnosis Pipeline
+
+The diagnosis workflow is asynchronous for scale:
+
+1. Client uploads image to `/client/diagnose`.
+2. Backend validates input and quota, stores image, and creates a diagnosis record with `status = pending`.
+3. `ProcessDiagnosisJob` is dispatched to the queue.
+4. Job moves status to `processing`, requests Gemini analysis via `DiagnoseService`, then writes final fields and sets `status = completed`.
+5. On failure, job sets `status = failed` with `failure_reason`.
+6. Frontend polls `/client/diagnose/{id}/status` until status is final.
+
+### Queue Worker
+
+Run a worker so queued diagnoses are processed:
+
+```bash
+php artisan queue:work
+```
+
+Set `QUEUE_CONNECTION` in `.env` (default is `database` in this project).
 
 ## Authentication & Middleware
 

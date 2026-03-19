@@ -69,6 +69,28 @@ it('returns all', function () {
 
 Import mock function before use: `use function Pest\Laravel\mock;`
 
+## Queue and Async Workflow Testing
+
+For queue-backed features:
+
+- Use `Queue::fake()` on request tests and assert jobs were pushed.
+- Test job logic separately by invoking `handle()` with faked external dependencies.
+- Assert lifecycle fields for async records (for example: `pending`, `processing`, `completed`, `failed`).
+- Test status endpoints that power polling UIs.
+
+<!-- Queue Assertion Example -->
+```php
+use Illuminate\Support\Facades\Queue;
+
+Queue::fake();
+
+$this->post(route('client.diagnose.store'), [
+    'image' => UploadedFile::fake()->image('leaf.jpg'),
+]);
+
+Queue::assertPushed(ProcessDiagnosisJob::class);
+```
+
 ## Datasets
 
 Use datasets for repetitive tests (validation rules, etc.):

@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 use RuntimeException;
 
 class DiagnoseService
@@ -38,13 +40,62 @@ class DiagnoseService
         return Diagnosis::create([
             'user_id' => $user->id,
             'image_path' => $imagePath,
+            'status' => Diagnosis::STATUS_COMPLETED,
             'plant_name' => $plantName ?: ($aiResult['plant_name'] ?? null),
             'disease_name' => $aiResult['disease_name'] ?? null,
             'confidence_score' => $aiResult['confidence_score'] ?? null,
             'symptoms' => $aiResult['symptoms'] ?? null,
             'treatment' => $aiResult['treatment'] ?? null,
+            'completed_at' => Carbon::now(),
             'raw_ai_response' => $aiResult['raw_ai_response'] ?? null,
         ]);
+    }
+
+    public function createPendingDiagnosis(User $user, UploadedFile $image, ?string $plantName = null): Diagnosis
+    {
+        $this->uploadQuotaService->ensureWithinDiagnoseQuota($user, $image);
+
+        $imagePath = $this->storeImage($user, $image);
+
+        return Diagnosis::create([
+            'user_id' => $user->id,
+            'image_path' => $imagePath,
+            'status' => Diagnosis::STATUS_PENDING,
+            'plant_name' => $plantName,
+        ]);
+    }
+
+    public function completeDiagnosis(Diagnosis $diagnosis): Diagnosis
+    {
+        $disk = (string) config('services.diagnose_uploads.disk', 'local');
+        $storage = Storage::disk($disk);
+
+        if (! $storage->exists($diagnosis->image_path)) {
+            throw new RuntimeException('Stored diagnosis image could not be found.');
+        }
+
+        $imageContent = $storage->get($diagnosis->image_path);
+        $mimeType = $storage->mimeType($diagnosis->image_path) ?: 'image/jpeg';
+
+        $aiResult = $this->requestAiDiagnosisFromImageData(
+            imageContent: $imageContent,
+            mimeType: $mimeType,
+            plantName: $diagnosis->plant_name,
+        );
+
+        $diagnosis->update([
+            'plant_name' => $diagnosis->plant_name ?: ($aiResult['plant_name'] ?? null),
+            'disease_name' => $aiResult['disease_name'] ?? null,
+            'confidence_score' => $aiResult['confidence_score'] ?? null,
+            'symptoms' => $aiResult['symptoms'] ?? null,
+            'treatment' => $aiResult['treatment'] ?? null,
+            'raw_ai_response' => $aiResult['raw_ai_response'] ?? null,
+            'status' => Diagnosis::STATUS_COMPLETED,
+            'failure_reason' => null,
+            'completed_at' => Carbon::now(),
+        ]);
+
+        return $diagnosis->refresh();
     }
 
     private function storeImage(User $user, UploadedFile $image): string
@@ -59,6 +110,20 @@ class DiagnoseService
      */
     private function requestAiDiagnosis(UploadedFile $image, ?string $plantName = null): array
     {
+        $mimeType = $image->getMimeType() ?: 'image/jpeg';
+
+        return $this->requestAiDiagnosisFromImageData(
+            imageContent: $image->getContent(),
+            mimeType: $mimeType,
+            plantName: $plantName,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function requestAiDiagnosisFromImageData(string $imageContent, string $mimeType, ?string $plantName = null): array
+    {
         $apiKey = config('services.gemini.api_key');
         $configuredModel = (string) config('services.gemini.model', '');
 
@@ -66,8 +131,7 @@ class DiagnoseService
             throw new RuntimeException('Missing GEMINI_API_KEY configuration.');
         }
 
-        $base64Image = base64_encode($image->getContent());
-        $mimeType = $image->getMimeType() ?: 'image/jpeg';
+        $base64Image = base64_encode($imageContent);
 
         $prompt = "You are a plant pathology assistant. Analyze the image and return only valid JSON with this exact shape: "
             . '{"plant_name":"string|null","disease_name":"string|null","confidence_score":0-100 number,"symptoms":"string|null","treatment":"string|null"}. '

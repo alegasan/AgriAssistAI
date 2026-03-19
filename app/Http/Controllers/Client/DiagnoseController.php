@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DiagnoseRequest;
+use App\Jobs\ProcessDiagnosisJob;
 use App\Models\Diagnosis;
 use App\Services\DiagnoseService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -23,19 +25,23 @@ class DiagnoseController extends Controller
     public function store(DiagnoseRequest $request, DiagnoseService $diagnoseService): RedirectResponse
     {
         try {
-            $diagnosis = $diagnoseService->diagnose(
+            $diagnosis = $diagnoseService->createPendingDiagnosis(
                 user: $request->user(),
                 image: $request->file('image'),
                 plantName: $request->input('plant_name')
             );
 
-            return back()->with('success', 'Diagnosis completed successfully.')->with('diagnosis', [
+            ProcessDiagnosisJob::dispatch($diagnosis->id);
+
+            return back()->with('success', 'Analysis queued successfully. Results will appear shortly.')->with('diagnosis', [
                 'id' => $diagnosis->id,
+                'status' => $diagnosis->status,
                 'plant_name' => $diagnosis->plant_name,
                 'disease_name' => $diagnosis->disease_name,
                 'confidence_score' => $diagnosis->confidence_score,
                 'symptoms' => $diagnosis->symptoms,
                 'treatment' => $diagnosis->treatment,
+                'failure_reason' => $diagnosis->failure_reason,
                 'image_url' => route('client.diagnose.image', $diagnosis),
             ]);
         } catch (ValidationException $exception) {
@@ -66,6 +72,23 @@ class DiagnoseController extends Controller
             'Content-Disposition' => "inline; filename=\"{$filename}\"",
             'Cache-Control' => 'private, max-age=300',
             'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function status(Request $request, Diagnosis $diagnosis): JsonResponse
+    {
+        abort_unless($diagnosis->user_id === $request->user()?->id, 403);
+
+        return response()->json([
+            'id' => $diagnosis->id,
+            'status' => $diagnosis->status,
+            'plant_name' => $diagnosis->plant_name,
+            'disease_name' => $diagnosis->disease_name,
+            'confidence_score' => $diagnosis->confidence_score,
+            'symptoms' => $diagnosis->symptoms,
+            'treatment' => $diagnosis->treatment,
+            'failure_reason' => $diagnosis->failure_reason,
+            'image_url' => route('client.diagnose.image', $diagnosis),
         ]);
     }
 }

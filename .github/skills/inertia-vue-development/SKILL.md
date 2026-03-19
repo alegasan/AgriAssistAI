@@ -189,6 +189,56 @@ router.delete(route('users.destroy', id))             // DELETE
 
 ---
 
+## 4.1 Async Queue Workflows (Upload Now, Process Later)
+
+Use this pattern when backend processing can exceed normal request time (for example AI analysis):
+
+1. Submit with `useForm` and return quickly from the backend with an identifier and initial state (for example `pending`).
+2. Poll a status endpoint (`GET /resource/{id}/status`) every 2-3 seconds.
+3. Render explicit states in UI: `pending`, `processing`, `completed`, `failed`.
+4. Stop polling on terminal states and on component unmount.
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, ref } from 'vue'
+
+const status = ref<'pending' | 'processing' | 'completed' | 'failed'>('pending')
+const poller = ref<number | null>(null)
+
+const stopPolling = () => {
+    if (poller.value !== null) {
+        window.clearInterval(poller.value)
+        poller.value = null
+    }
+}
+
+const startPolling = (id: number) => {
+    stopPolling()
+    poller.value = window.setInterval(async () => {
+        const response = await fetch(route('client.diagnose.status', id), {
+            headers: { Accept: 'application/json' },
+            credentials: 'same-origin',
+        })
+
+        if (!response.ok) {
+            return
+        }
+
+        const payload = await response.json()
+        status.value = payload.status
+
+        if (status.value === 'completed' || status.value === 'failed') {
+            stopPolling()
+        }
+    }, 2000)
+}
+
+onBeforeUnmount(() => stopPolling())
+</script>
+```
+
+---
+
 ### `<Form>` Component (Simple CRUD — Recommended)
 
 ```vue

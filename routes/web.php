@@ -65,8 +65,10 @@ Route::middleware('auth')->group(function () {
             ->middleware('throttle:diagnose-upload')
             ->name('client.diagnose.store');
         Route::get('/client/diagnose/{diagnosis}/status', [DiagnoseController::class, 'status'])
+            ->middleware('can:view,diagnosis')
             ->name('client.diagnose.status');
         Route::get('/client/diagnose/{diagnosis}/image', [DiagnoseController::class, 'image'])
+            ->middleware('can:view,diagnosis')
             ->name('client.diagnose.image');
         Route::get('/client/reports', [ReportController::class, 'index'])
             ->name('client.reports');
@@ -78,6 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/client/knowledgehub', [KnowledgeHubController::class, 'index'])
             ->name('client.knowledgehub');
         Route::get('/client/profile/{user}', [ProfileController::class, 'show'])
+            ->middleware('can:view,user')
             ->name('client.profile');
     });
 });

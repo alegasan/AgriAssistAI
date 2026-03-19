@@ -38,8 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 429, $exception->getHeaders());
             }
 
-            // For register and diagnose routes, return 429 for all requests
-            if ($request->routeIs('register.store', 'client.diagnose.store')) {
+            // For register route only, return 429 for all requests
+            if ($request->routeIs('register.store')) {
                 return response()->json([
                     'message' => "Too many attempts. Try again in {$waitInMinutes} minute(s).",
                     'retry_after' => $retryAfterSeconds,

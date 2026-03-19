@@ -490,7 +490,9 @@ onBeforeUnmount(() => {
 
                     <div v-if="isDiagnosisStuck" class="mt-3 rounded-lg border border-amber-300 bg-amber-100/70 p-3 text-amber-900">
                         <p class="font-semibold">Processing is taking longer than expected.</p>
-                        <p class="mt-1 text-sm">Queue worker may not be running. Start <span class="font-mono">php artisan queue:work</span> and then click refresh below.</p>
+                        <p class="mt-1 text-sm">
+                            Please wait a moment longer or try refreshing. If the issue persists, contact support.
+                        </p>
                         <button
                             type="button"
                             class="mt-3 inline-flex items-center justify-center rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-50"
@@ -498,8 +500,7 @@ onBeforeUnmount(() => {
                         >
                             Refresh status
                         </button>
-                    </div>
-                </div>
+                    </div>                </div>
 
                 <div v-if="diagnosis && diagnosisStatus === 'failed'" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                     <p class="font-semibold">Diagnosis failed</p>

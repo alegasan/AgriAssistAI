@@ -35,12 +35,20 @@ class ProcessDiagnosisJob implements ShouldQueue
             return;
         }
 
-        $diagnosis->update([
-            'status' => Diagnosis::STATUS_PROCESSING,
-            'attempted_at' => Carbon::now(),
-            'failure_reason' => null,
-        ]);
+        $updated = Diagnosis::query()
+            ->where('id', $this->diagnosisId)
+            ->whereNotIn('status', [Diagnosis::STATUS_COMPLETED, Diagnosis::STATUS_PROCESSING])
+            ->update([
+                'status' => Diagnosis::STATUS_PROCESSING,
+                'attempted_at' => Carbon::now(),
+                'failure_reason' => null,
+            ]);
 
+        if ($updated === 0) {
+            return; // Another worker is already processing or it's completed
+        }
+
+        $diagnosis->refresh();
         try {
             $diagnoseService->completeDiagnosis($diagnosis);
         } catch (\Throwable $exception) {

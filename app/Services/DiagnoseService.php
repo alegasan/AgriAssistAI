@@ -75,6 +75,11 @@ class DiagnoseService
         }
 
         $imageContent = $storage->get($diagnosis->image_path);
+
+        if (! is_string($imageContent) || $imageContent === '') {
+            throw new RuntimeException('Stored diagnosis image content is missing or unreadable.');
+        }
+
         $mimeType = $storage->mimeType($diagnosis->image_path) ?: 'image/jpeg';
 
         $aiResult = $this->requestAiDiagnosisFromImageData(

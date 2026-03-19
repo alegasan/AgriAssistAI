@@ -70,6 +70,9 @@ Route::middleware('auth')->group(function () {
             ->name('client.diagnose.image');
         Route::get('/client/reports', [ReportController::class, 'index'])
             ->name('client.reports');
+        Route::delete('/client/destroy/{diagnosis}', [ReportController::class, 'destroy'])
+            ->name('client.reports.destroy')
+            ->middleware('can:delete,diagnosis');
         Route::get('/client/support', [SupportController::class, 'index'])
             ->name('client.support');
         Route::get('/client/knowledgehub', [KnowledgeHubController::class, 'index'])

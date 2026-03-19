@@ -29,6 +29,7 @@ const props = defineProps<{
     confirmLabel?: string
     cancelLabel?: string
     triggerClass?: string
+    confirmClass?: string
     triggerDisabled?: boolean
     confirmDisabled?: boolean
 }>()
@@ -82,7 +83,7 @@ const handleConfirm = () => {
                 </AlertDialogCancel>
                 <AlertDialogAction
                     variant="destructive"
-                    class="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
+                    :class="props.confirmClass ?? 'rounded-xl bg-emerald-600 text-white hover:bg-emerald-700'"
                     :disabled="props.confirmDisabled"
                     @click="handleConfirm"
                 >

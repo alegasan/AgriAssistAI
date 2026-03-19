@@ -38,7 +38,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 429, $exception->getHeaders());
             }
 
-            
+            // For POST/PUT/PATCH/DELETE requests, always return 429
+            if (in_array($request->getMethod(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+                return response()->json([
+                    'message' => "Too many attempts. Try again in {$waitInMinutes} minute(s).",
+                    'retry_after' => $retryAfterSeconds,
+                ], 429, $exception->getHeaders());
+            }
+
             $errorKey = match (true) {
                 $request->routeIs('login.*') => 'login',
                 $request->routeIs('register.*') => 'email',

@@ -12,6 +12,8 @@ class ProcessDiagnosisJob implements ShouldQueue
 {
     use Queueable;
 
+    private const USER_FACING_FAILURE_MESSAGE = 'Unable to complete diagnosis right now. Please try again in a moment.';
+
     public int $tries = 3;
 
     /**
@@ -52,9 +54,11 @@ class ProcessDiagnosisJob implements ShouldQueue
         try {
             $diagnoseService->completeDiagnosis($diagnosis);
         } catch (\Throwable $exception) {
+            report($exception);
+
             $diagnosis->update([
                 'status' => Diagnosis::STATUS_FAILED,
-                'failure_reason' => mb_substr($exception->getMessage(), 0, 1000),
+                'failure_reason' => self::USER_FACING_FAILURE_MESSAGE,
             ]);
 
             throw $exception;

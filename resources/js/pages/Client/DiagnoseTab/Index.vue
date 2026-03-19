@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
-import { Camera, ChevronDown, Image as ImageIcon, LoaderCircle, RefreshCw, Upload } from 'lucide-vue-next'
+import { Camera, Image as ImageIcon, LoaderCircle, RefreshCw, Upload } from 'lucide-vue-next'
 import ClientDashboard from '@/layouts/Client/ClientDashboard.vue'
 
 type DiagnosisResult = {
@@ -95,6 +95,31 @@ const isDiagnosisStuck = computed(() => {
     return Date.now() - pollingStartedAt.value > 30000
 })
 const diagnosisError = computed(() => (form.errors as Record<string, string | undefined>).diagnosis)
+const safeDiagnosisFailureReason = computed(() => {
+    const reason = diagnosis.value?.failure_reason?.trim()
+
+    if (!reason) {
+        return 'Unable to complete diagnosis right now. Please try again in a moment.'
+    }
+
+    const lowerReason = reason.toLowerCase()
+    const looksLikeRawError = [
+        'http://',
+        'https://',
+        'curl',
+        'exception',
+        'stack trace',
+        'api',
+        'key=',
+        'generativelanguage.googleapis.com',
+    ].some((indicator) => lowerReason.includes(indicator))
+
+    if (looksLikeRawError) {
+        return 'Unable to complete diagnosis right now. Please try again in a moment.'
+    }
+
+    return reason
+})
 
 const stopDiagnosisPolling = (): void => {
     if (diagnosisPollingInterval.value !== null) {
@@ -358,7 +383,7 @@ onBeforeUnmount(() => {
             </div>
         </transition>
 
-        <div class="mx-auto mt-4 grid w-full max-w-6xl gap-6 px-4 sm:px-6 lg:px-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="mx-auto mt-4 grid w-full max-w-6xl items-start gap-6 px-4 sm:px-6 lg:px-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <section class="rounded-[28px] border border-emerald-100/80 bg-slate-50 p-6 shadow-[0_18px_40px_-28px_rgba(5,150,105,0.45)]">
                 <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">AI Diagnosis</h2>
                 <p class="mt-1 text-sm text-slate-600">Upload a photo to analyze your crops</p>
@@ -426,10 +451,9 @@ onBeforeUnmount(() => {
                                 id="plant_name"
                                 v-model="form.plant_name"
                                 type="text"
-                                placeholder="Select crop type..."
-                                class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                                placeholder="Enter crop type..."
+                                class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                             >
-                            <ChevronDown class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                         </div>
                         <p v-if="form.errors.plant_name" class="text-xs text-red-600">{{ form.errors.plant_name }}</p>
                     </div>
@@ -456,10 +480,6 @@ onBeforeUnmount(() => {
             <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 class="text-lg font-semibold tracking-tight text-slate-900">Latest Result</h2>
                 <p class="mt-1 text-sm text-slate-600">Your most recent diagnosis appears here after upload.</p>
-
-                <p v-if="flash.success" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-                    {{ flash.success }}
-                </p>
 
                 <p v-if="flash.error" class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
                     {{ flash.error }}
@@ -504,7 +524,7 @@ onBeforeUnmount(() => {
 
                 <div v-if="diagnosis && diagnosisStatus === 'failed'" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                     <p class="font-semibold">Diagnosis failed</p>
-                    <p class="mt-1">{{ diagnosis.failure_reason || 'Please try again in a moment.' }}</p>
+                    <p class="mt-1">{{ safeDiagnosisFailureReason }}</p>
                 </div>
 
                 <div v-if="diagnosis && diagnosisStatus === 'completed'" class="mt-4 space-y-4">

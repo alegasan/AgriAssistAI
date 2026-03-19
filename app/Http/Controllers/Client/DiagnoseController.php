@@ -33,7 +33,7 @@ class DiagnoseController extends Controller
 
             ProcessDiagnosisJob::dispatch($diagnosis->id);
 
-            return back()->with('success', 'Analysis queued successfully. Results will appear shortly.')->with('diagnosis', [
+            return back()->with('success', 'Image uploaded. Analysis is now running. Results will appear shortly.')->with('diagnosis', [
                 'id' => $diagnosis->id,
                 'status' => $diagnosis->status,
                 'plant_name' => $diagnosis->plant_name,

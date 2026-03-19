@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Requests\Form\RegisterRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+
 class RegisterController extends Controller
 {
     public function showRegistrationForm()
@@ -16,6 +19,14 @@ class RegisterController extends Controller
 
     public function register(RegisterRequest $request)
     {
+
+            $key = 'register:' . $request->input('email');
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            abort(429);
+        }
+
+        RateLimiter::hit($key);
          $request->validated();
 
    

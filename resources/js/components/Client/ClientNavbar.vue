@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Bell, CircleCheckBig, Leaf } from "lucide-vue-next"
 import { useForm, usePage } from "@inertiajs/vue3"
+import { Link } from "@inertiajs/vue3"
+import { Bell, CircleCheckBig, Leaf } from "lucide-vue-next"
+import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { route } from "ziggy-js"
 import AlertDialog from "@/components/AlertDialog.vue"
-import { Link } from "@inertiajs/vue3"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { computed, onBeforeUnmount, ref, watch } from "vue"
 
 
 const navItems = [
@@ -25,7 +25,6 @@ const handleLogout = () => {
     logoutForm.post(route("logout"))
 }
 const page = usePage()
-page.props.auth.user.id
 
 const flash = computed(() => (page.props.flash ?? {}) as { success?: string })
 const showSuccessToast = ref(false)

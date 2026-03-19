@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Head } from "@inertiajs/vue3";
 import {
     BookOpen,
     Camera,
@@ -9,7 +10,6 @@ import {
     Sun,
 } from "lucide-vue-next"
 import ClientNavbar from "@/components/Client/ClientNavbar.vue"
-import { Head } from "@inertiajs/vue3";
 import QuickActionsCard from "@/components/Client/QuickActionsCard.vue";
 </script>
 

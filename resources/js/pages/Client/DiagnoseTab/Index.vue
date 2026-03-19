@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
 import { Camera, Image as ImageIcon, LoaderCircle, RefreshCw, Upload } from 'lucide-vue-next'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { route } from 'ziggy-js'
 import ClientDashboard from '@/layouts/Client/ClientDashboard.vue'
 
 type DiagnosisResult = {

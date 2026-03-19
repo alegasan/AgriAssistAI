@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Camera, User } from "lucide-vue-next";
 import { usePage } from "@inertiajs/vue3";
+import { Camera, User } from "lucide-vue-next";
 import ClientDashboard from "@/layouts/Client/ClientDashboard.vue";
 
 const page = usePage()

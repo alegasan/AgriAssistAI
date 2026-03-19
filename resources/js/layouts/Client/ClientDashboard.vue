@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import ClientNavbar from "@/components/Client/ClientNavbar.vue"
 import { Head } from "@inertiajs/vue3";
+import ClientNavbar from "@/components/Client/ClientNavbar.vue"
 
 
 const props = defineProps<{

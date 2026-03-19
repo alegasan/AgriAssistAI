@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
 import { usePage } from "@inertiajs/vue3";
+import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
 
 const page = usePage();
 const users = page.props.users as Array<{

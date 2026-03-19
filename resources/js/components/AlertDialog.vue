@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Leaf } from "lucide-vue-next"
+import { ref } from "vue"
 import { 
     AlertDialog , 
     AlertDialogAction , 
@@ -10,8 +12,6 @@ import {
 } 
 from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Leaf } from "lucide-vue-next"
-import { ref } from "vue"
 
 const open = ref(false)
 

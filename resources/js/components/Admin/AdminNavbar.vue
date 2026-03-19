@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { Bell, Leaf } from "lucide-vue-next"
 import { useForm } from "@inertiajs/vue3";
-import AlertDialog from "@/components/AlertDialog.vue"
 import { Link } from "@inertiajs/vue3"
+import { Bell, Leaf } from "lucide-vue-next"
+import { route } from "ziggy-js";
+import AlertDialog from "@/components/AlertDialog.vue"
 const navItems = [
     { label: 'Dashboard', routeName: 'admin.dashboard', href: route('admin.dashboard') },
     { label: 'Users', routeName: 'admin.users.index', href: route('admin.users.index') },
     { label: 'Diseases', routeName: 'admin.diseases.index', href: route('admin.diseases.index') },
     { label: 'Diagnoses', routeName: 'admin.diagnoses.index', href: route('admin.diagnoses.index') },
 ]
-import { route } from "ziggy-js";
 const isActive = (routeName?: string) => (routeName ? route().current(routeName) : false)
 const logoutForm = useForm()
 const handleLogout = () => {

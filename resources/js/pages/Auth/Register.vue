@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { Head, Link } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import { route } from 'ziggy-js'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -13,9 +16,6 @@ import {
 import { InputError } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Head, Link } from '@inertiajs/vue3'
-import { useForm } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
 
 const form = useForm({
     name: '',

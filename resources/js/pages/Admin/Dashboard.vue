@@ -6,8 +6,8 @@ import {
     UserCog,
     Users,
 } from "lucide-vue-next"
-import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
 import CardInfo from "@/components/CardInfo.vue";
+import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
 
 defineProps<{
     stats: {

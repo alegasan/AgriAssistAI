@@ -52,4 +52,12 @@ return [
         'max_user_storage_mb' => (int) env('DIAGNOSE_MAX_USER_STORAGE_MB', 50),
     ],
 
+    'weather' => [
+        'driver' => env('WEATHER_API_DRIVER', 'openweather'),
+        'api_key' => env('WEATHER_API_KEY'),
+        'cache_ttl' => (int) env('WEATHER_CACHE_TTL', 600),
+        'default_latitude' => env('WEATHER_DEFAULT_LATITUDE', null),
+        'default_longitude' => env('WEATHER_DEFAULT_LONGITUDE', null),
+    ],
+
 ];

@@ -16,6 +16,7 @@ use App\Http\Controllers\Client\ReportController;
 use App\Http\Controllers\Client\SupportController;
 use App\Http\Controllers\Client\KnowledgeHubController;
 use App\Http\Controllers\Client\ProfileController;
+use App\Http\Controllers\Client\WeatherController;
 
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -51,6 +52,8 @@ Route::middleware('auth')->group(function () {
             ->name('admin.users.index');
         Route::get('/admin/diagnoses', [DiagnosesController::class, 'index'])
             ->name('admin.diagnoses.index');
+        Route::get('/admin/diagnoses/{diagnosis}/image', [DiagnosesController::class, 'image'])
+            ->name('admin.diagnoses.image');
         Route::get('/admin/diseases', [DiseasesController::class, 'index'])
             ->name('admin.diseases.index');
     });
@@ -82,5 +85,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/client/profile/{user}', [ProfileController::class, 'show'])
             ->middleware('can:view,user')
             ->name('client.profile');
+        Route::get('/client/weather/current', [WeatherController::class, 'current'])
+            ->name('client.weather.current');
+        Route::get('/client/weather/forecast', [WeatherController::class, 'forecast'])
+            ->name('client.weather.forecast');
     });
 });

@@ -7,7 +7,7 @@ const users = page.props.users as Array<{
     id: number | string;
     name: string;
     email: string;
-    diagnoses?: number | null;
+    diagnoses_count?: number | null;
     is_active?: boolean | null;
     created_at_formatted?: string | null;
 }>;
@@ -47,7 +47,7 @@ const statusLabel = (value?: boolean | null) => (value ? "Active" : "Inactive");
                                     <div class="text-xs text-slate-500">{{ user.email }}</div>
                                 </td>
                                 <td class="px-6 py-4 text-slate-600">{{ user.created_at_formatted}}</td>
-                                <td class="px-6 py-4 text-slate-900">{{ user.diagnoses ?? 0 }}</td>
+                                <td class="px-6 py-4 text-slate-900">{{ user.diagnoses_count ?? 0  }}</td>
                                 <td class="px-6 py-4">
                                     <span
                                         class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"

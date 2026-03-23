@@ -12,8 +12,10 @@ class UserController extends Controller
     public function index()
     {
 
-        $users = User::All();
-           
+        $users = User::where('role', '!=', 'admin')
+        ->withCount('diagnoses')
+        ->get();
+        
         return Inertia::render('Admin/Users/Index', [
             'users' => $users
         ]);

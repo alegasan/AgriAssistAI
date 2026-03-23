@@ -68,4 +68,6 @@ class User extends Authenticatable
     {
         return $this->created_at?->format('M d, Y');
     }
+
+    
 }

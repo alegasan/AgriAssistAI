@@ -21,7 +21,7 @@ class ReportController extends Controller
         $search = trim((string) $request->query('search', ''));
         $risk = DiagnosisRisk::tryFrom(strtolower(trim((string) $request->query('risk', ''))));
 
-        $diagnoses = Diagnosis::query()
+        $diagnosesPaginator = Diagnosis::query()
             ->where('user_id', $request->user()->id)
             ->completed()
             ->when($search !== '', fn ($query) => $query->search($search))
@@ -30,8 +30,21 @@ class ReportController extends Controller
             ->paginate($paginationSize)
             ->withQueryString();
 
+        $diagnoses = [
+            'data' => $diagnosesPaginator->getCollection()
+                ->map(fn ($diagnosis) => (new DiagnosisReportResource($diagnosis))->toArray($request))
+                ->values()
+                ->all(),
+            'current_page' => $diagnosesPaginator->currentPage(),
+            'last_page' => $diagnosesPaginator->lastPage(),
+            'total' => $diagnosesPaginator->total(),
+            'from' => $diagnosesPaginator->firstItem(),
+            'to' => $diagnosesPaginator->lastItem(),
+            'links' => $diagnosesPaginator->linkCollection()->toArray(),
+        ];
+
         return Inertia::render('Client/ReportsTab/Index', [
-            'diagnoses' => DiagnosisReportResource::collection($diagnoses),
+            'diagnoses' => $diagnoses,
             'filters' => [
                 'search' => $search,
                 'risk' => $risk?->value ?? 'all',

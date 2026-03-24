@@ -64,13 +64,16 @@ class Diagnosis extends Model
 
     public function scopeSearch(Builder $query, string $term): void
     {
-        $escaped = addcslashes($term, "%_\\");
+        $escapeChar = '!';
+        $escaped = str_replace($escapeChar, $escapeChar . $escapeChar, $term);
+        $escaped = str_replace('%', $escapeChar . '%', $escaped);
+        $escaped = str_replace('_', $escapeChar . '_', $escaped);
         $pattern = "%{$escaped}%";
 
-        $query->where(function (Builder $innerQuery) use ($pattern) {
-            $innerQuery->whereRaw("disease_name like ? escape '\\\\'", [$pattern])
-                ->orWhereRaw("plant_name like ? escape '\\\\'", [$pattern])
-                ->orWhereRaw("symptoms like ? escape '\\\\'", [$pattern]);
+        $query->where(function (Builder $innerQuery) use ($pattern, $escapeChar) {
+            $innerQuery->whereRaw("disease_name like ? escape '{$escapeChar}'", [$pattern])
+                ->orWhereRaw("plant_name like ? escape '{$escapeChar}'", [$pattern])
+                ->orWhereRaw("symptoms like ? escape '{$escapeChar}'", [$pattern]);
         });
     }
 

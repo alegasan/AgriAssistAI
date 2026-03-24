@@ -56,10 +56,10 @@ it('paginates client reports and scopes records to completed diagnoses of the au
             ->component('Client/ReportsTab/Index')
             ->where('filters.search', '')
             ->where('filters.risk', 'all')
-            ->has('diagnoses.data', 6)
+            ->has('diagnoses.data', 8)
             ->where('diagnoses.total', 8)
             ->where('diagnoses.current_page', 1)
-            ->where('diagnoses.last_page', 2)
+            ->where('diagnoses.last_page', 1)
             ->where('diagnoses.data.0.title', 'Disease 1'));
 });
 

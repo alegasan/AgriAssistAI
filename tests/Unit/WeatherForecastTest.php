@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 test('getForecast returns expected days and structure', function () {
+    config()->set('services.weather.api_key', 'test-key');
+
     // Build a fake list array for 7 days
     $list = [];
     $now = time();

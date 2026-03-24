@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 test('getCurrentWeather returns expected structure', function () {
+    config()->set('services.weather.api_key', 'test-key');
+
     Http::fake([
         'api.openweathermap.org/*' => Http::response([
             'main' => ['temp' => 28, 'feels_like' => 30, 'humidity' => 45],

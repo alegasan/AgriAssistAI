@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
 import { Sun, Moon, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog } from 'lucide-vue-next'
+import { ref, onMounted, computed } from 'vue'
 
 const loading = ref(true)
 const forecast = ref<Array<any>>([])

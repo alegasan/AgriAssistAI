@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
 import { Sun, Moon, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog } from 'lucide-vue-next'
+import { ref, onMounted, computed } from 'vue'
 
 const loading = ref(true)
 const weather = ref<any | null>(null)
@@ -37,8 +37,7 @@ async function fetchWeather() {
     if (!res.ok) return
     const json = await res.json()
     if (json.success) weather.value = json.data
-  } catch (e) {
-    // Network error or JSON parse failure - show fallback UI
+  } catch {
   } finally {
     loading.value = false
   }

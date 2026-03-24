@@ -276,8 +276,9 @@ const handleSheetOpenChange = (open: boolean): void => {
                                     ? 'bg-emerald-600 text-white shadow-sm'
                                     : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
                             "
-                            v-html="link.label"
-                        />
+                        >
+                            <span v-html="link.label"></span>
+                        </Link>
                     </template>
                 </div>
             </div>

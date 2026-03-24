@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from "@inertiajs/vue3";
-import { ref, onMounted } from "vue";
 import {
     BookOpen,
     Camera,
@@ -10,6 +9,7 @@ import {
     ShieldCheck,
     Sun,
 } from "lucide-vue-next";
+import { ref, onMounted } from "vue";
 import ClientNavbar from "@/components/Client/ClientNavbar.vue";
 import QuickActionsCard from "@/components/Client/QuickActionsCard.vue";
 import WeatherCard from "@/components/Client/WeatherCard.vue";
@@ -36,7 +36,7 @@ async function fetchCurrentWeather() {
         const res = await fetch('/client/weather/current');
         const json = await res.json();
         if (json.success) currentWeather.value = json.data;
-    } catch (e) {
+    } catch {
         // ignore
     } finally {
         weatherLoading.value = false;

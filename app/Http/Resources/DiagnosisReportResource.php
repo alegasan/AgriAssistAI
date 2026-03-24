@@ -21,7 +21,9 @@ class DiagnosisReportResource extends JsonResource
             'created_at' => $this->created_at?->toIso8601String(),
             'risk' => $this->confidence_score !== null
                 ? DiagnosisRisk::fromConfidence($this->confidence_score)->label()
-                : 'Unknown',            'notes' => $this->symptoms ?: 'No symptom details were captured for this report.',
+                : 'Unknown',
+            'notes' => $this->symptoms ?: 'No symptom details were captured for this report.',
+            'treatment' => $this->treatment ?: 'No treatment details were captured for this report.',
             'image_url' => route('client.diagnose.image', $this->resource),
         ];
     }

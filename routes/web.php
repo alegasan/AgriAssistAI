@@ -50,6 +50,9 @@ Route::middleware('auth')->group(function () {
             ->name('admin.dashboard');
         Route::get('/admin/users', [UserController::class, 'index'])
             ->name('admin.users.index');
+        Route::patch('/admin/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])
+            ->name('admin.users.toggle-status')
+            ->middleware('can:toggleStatus,user');
         Route::get('/admin/diagnoses', [DiagnosesController::class, 'index'])
             ->name('admin.diagnoses.index');
         Route::get('/admin/diagnoses/{diagnosis}/image', [DiagnosesController::class, 'image'])
@@ -78,8 +81,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/client/destroy/{diagnosis}', [ReportController::class, 'destroy'])
             ->name('client.reports.destroy')
             ->middleware('can:delete,diagnosis');
-        Route::get('/client/support', [SupportController::class, 'index'])
-            ->name('client.support');
         Route::get('/client/knowledgehub', [KnowledgeHubController::class, 'index'])
             ->name('client.knowledgehub');
         Route::get('/client/profile/{user}', [ProfileController::class, 'show'])

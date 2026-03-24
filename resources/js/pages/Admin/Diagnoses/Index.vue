@@ -146,7 +146,7 @@ const handleSheetOpenChange = (open: boolean): void => {
                                         class="rounded-full border border-emerald-200 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50"
                                         @click="openDiagnosis(diagnosis)"
                                     >
-                                        View all
+                                        View
                                     </button>
                                 </td>
                             </tr>

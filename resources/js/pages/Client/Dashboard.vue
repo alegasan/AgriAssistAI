@@ -37,7 +37,6 @@ async function fetchCurrentWeather() {
         const json = await res.json();
         if (json.success) currentWeather.value = json.data;
     } catch {
-        // ignore
     } finally {
         weatherLoading.value = false;
     }

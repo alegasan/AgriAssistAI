@@ -21,7 +21,7 @@ import {
         <nav class="flex items-center justify-between px-6 lg:px-8 py-4 bg-white/50 backdrop-blur-md sticky top-0 z-50">
             <div class="flex items-center gap-2">
                 <Leaf class="w-8 h-8 text-emerald-600" />
-                <span class="text-xl font-bold text-slate-900">PlantGuard AI</span>
+                <span class="text-xl font-bold text-slate-900">AgriAssist AI</span>
             </div>
             
             <div class="flex items-center gap-8">

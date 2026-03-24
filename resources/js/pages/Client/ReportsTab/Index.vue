@@ -17,6 +17,7 @@ type ReportItem = {
     created_at: string | null;
     risk: RiskLevel;
     notes: string;
+    treatment: string;
     image_url: string;
 };
 
@@ -338,6 +339,11 @@ const riskBadgeClass: Record<RiskLevel, string> = {
                             <article class="rounded-2xl border border-emerald-100/70 bg-white p-4 shadow-sm">
                                 <p class="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">Report Notes</p>
                                 <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{{ selectedReport.notes }}</p>
+                            </article>
+
+                            <article class="rounded-2xl border border-emerald-100/70 bg-white p-4 shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">Treatment</p>
+                                <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{{ selectedReport.treatment }}</p>
                             </article>
 
                             <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">

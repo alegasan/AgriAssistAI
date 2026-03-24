@@ -8,13 +8,13 @@ import {
 } from "lucide-vue-next"
 import CardInfo from "@/components/CardInfo.vue";
 import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
+import QuickActionsCard from "@/components/Client/QuickActionsCard.vue";
 
 defineProps<{
     stats: {
         farmers:   { total: number; new_today: number }
-        diseases:  { total: number; new_today: number }
+        diseases:  { total: number | null; new_today: number | null }
         diagnoses: { total: number; new_today: number }
-        pending:   { total: number; new_today: number }
     }
 }>()
 </script>
@@ -24,11 +24,16 @@ defineProps<{
 
     <AdminDashboard :title="'Admin Dashboard'" :description="'Heres an overview of the latest stats and activity on PlantGuard AI.'">
 
-        <div class="mt-8 grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-            <CardInfo title="Total Users" :value="stats.farmers.total.toLocaleString()"  :change="`+${stats.farmers.new_today ?? 0}`" description="Total registered farmers" :icon="Users" />
-            <CardInfo title="Active Diseases" value="47" change="+3" description="Diseases in knowledge base" :icon="Biohazard" />
-            <CardInfo title="Total Diagnoses" value="8,432" change="+47" description="Diagnoses submitted by farmers" :icon="ClipboardList" />
-            <CardInfo title="Pending Reviews" value="89" change="+5" description="Diagnoses awaiting expert review" :icon="Clock" />
+        <div class="mt-8 grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <CardInfo title="Total Users" :value="(stats?.farmers?.total ?? 0).toLocaleString()"  :change="`+${stats?.farmers?.new_today ?? 0}`" description="Total registered farmers" :icon="Users" />
+            <CardInfo
+                title="Active Diseases"
+                :value="stats?.diseases?.total === null ? 'N/A' : (stats?.diseases?.total ?? 0).toLocaleString()"
+                :change="stats?.diseases?.new_today === null ? '—' : `+${stats?.diseases?.new_today ?? 0}`"
+                description="Diseases in knowledge base"
+                :icon="Biohazard"
+            />
+            <CardInfo title="Total Diagnoses" :value="(stats?.diagnoses?.total ?? 0).toLocaleString()" :change="`+${stats?.diagnoses?.new_today ?? 0}`" description="Diagnoses submitted by farmers" :icon="ClipboardList" />
         </div>
 
         <section class="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -38,38 +43,31 @@ defineProps<{
                 </div>
 
                 <div class="space-y-3">
-                    <div
-                        class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
-                        <div class="grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                            <UserCog class="h-6 w-6" aria-hidden="true" />
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-slate-900">Manage Users</p>
-                            <p class="text-xs text-slate-500">View and manage all accounts</p>
-                        </div>
-                    </div>
-
-                    <div
-                        class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
-                        <div class="grid h-12 w-12 place-items-center rounded-full bg-rose-100 text-rose-600">
-                            <Biohazard class="h-6 w-6" aria-hidden="true" />
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-slate-900">Manage Diseases</p>
-                            <p class="text-xs text-slate-500">CRUD disease knowledge base</p>
-                        </div>
-                    </div>
-
-                    <div
-                        class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
-                        <div class="grid h-12 w-12 place-items-center rounded-full bg-amber-100 text-amber-600">
-                            <ClipboardList class="h-6 w-6" aria-hidden="true" />
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-slate-900">All Diagnoses</p>
-                            <p class="text-xs text-slate-500">Browse submitted diagnoses</p>
-                        </div>
-                    </div>
+                    <QuickActionsCard
+                        title="Manage Users"
+                        description="View and manage all accounts"
+                        :icon="UserCog"
+                        layout="inline"
+                        href="/admin/users"
+                        :class="' bg-emerald-100 text-emerald-700'"
+                       
+                    />
+                    <QuickActionsCard
+                        title="Manage Diseases"
+                        description="View disease knowledge base"
+                        :icon="Biohazard"
+                        layout="inline"
+                        href="/admin/diseases"
+                        :class="' bg-rose-100 text-rose-600'"
+                    />
+                    <QuickActionsCard
+                        title="All Diagnoses"
+                        description="Browse submitted diagnoses"
+                        :icon="ClipboardList"
+                        layout="inline"
+                        href="/admin/diagnoses"
+                        :class="' bg-amber-100 text-amber-600'"
+                    />
                 </div>
             </div>
 

@@ -10,4 +10,9 @@ class UserPolicy
     {
         return $authUser->id === $user->id;
     }
+
+    public function toggleStatus(User $authUser, User $user): bool
+    {
+        return $authUser->isAdmin() && !$user->isAdmin();
+    }
 }

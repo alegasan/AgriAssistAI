@@ -12,7 +12,6 @@ const navItems = [
     { label: "Home", routeName: "client.dashboard", href: route("client.dashboard") },
     { label: "Diagnose", routeName: "client.diagnose", href: route("client.diagnose") },
     { label: "Reports", routeName: "client.reports", href: route("client.reports") },
-    { label: "Support", routeName: "client.support", href: route("client.support") },
     { label: "Knowledge Hub", routeName: "client.knowledgehub", href: route("client.knowledgehub") },
 ]
 

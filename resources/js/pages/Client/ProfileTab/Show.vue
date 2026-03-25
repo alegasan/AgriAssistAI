@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import { Camera, User } from "lucide-vue-next";
+import { computed } from "vue";
 import ClientDashboard from "@/layouts/Client/ClientDashboard.vue";
 
 const props = defineProps<{ user?: Record<string, any> }>();

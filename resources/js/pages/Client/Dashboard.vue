@@ -5,7 +5,6 @@ import {
     Camera,
     CheckCircle2,
     FileText,
-    MessageCircle,
     ShieldCheck,
     Sun,
 } from "lucide-vue-next";

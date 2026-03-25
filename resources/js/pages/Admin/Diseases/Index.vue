@@ -88,6 +88,12 @@ const previewText = (value: string | null, fallback: string): string => {
     return value;
 };
 
+const decodeHtmlEntities = (value: string): string => {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = value;
+    return textarea.value;
+};
+
 watch(
     () => searchQuery.value,
     () => {
@@ -226,15 +232,13 @@ onBeforeUnmount(() => {
                         <span
                             v-if="!link.url"
                             class="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-400"
-                            v-html="link.label"
-                        />
+                        >{{ decodeHtmlEntities(link.label) }}</span>
                         <Link
                             v-else
                             :href="link.url"
                             class="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700"
                             :class="link.active ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : ''"
-                            v-html="link.label"
-                        />
+                        >{{ decodeHtmlEntities(link.label) }}</Link>
                     </template>
                 </div>
             </div>

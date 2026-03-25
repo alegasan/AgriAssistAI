@@ -234,15 +234,13 @@ onBeforeUnmount(() => {
                     <span
                         v-if="!link.url"
                         class="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-400"
-                        v-text="decodeHtmlEntities(link.label)"
-                    ></span>
+                    >{{ decodeHtmlEntities(link.label) }}</span>
                     <Link
                         v-else
                         :href="link.url"
                         class="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700"
                         :class="link.active ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : ''"
-                        v-text="decodeHtmlEntities(link.label)"
-                    ></Link>
+                    >{{ decodeHtmlEntities(link.label) }}</Link>
                 </template>
             </div>
         </div>

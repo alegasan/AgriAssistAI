@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Models\User;
+use App\Models\Disease;
 use App\Models\Diagnosis;
 use Illuminate\Support\Facades\Cache;
 
@@ -33,7 +34,10 @@ class DashboardStatsService
 
     private function diseaseStats(): array
     {
-        return ['total' => null, 'new_today' => null];
+        $data = Disease::selectRaw('COUNT(*) as total, SUM(DATE(created_at) = CURDATE()) as new_today')
+            ->first();
+
+        return ['total' => $data->total, 'new_today' => $data->new_today ?? 0];
     }
 
     private function diagnosisStats(): array

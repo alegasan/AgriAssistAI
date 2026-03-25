@@ -137,7 +137,7 @@ const confidenceMeta = (score: RecentDiagnosis["confidence_score"]) => {
                     <h2 class="text-lg font-semibold text-slate-900">Quick Actions</h2>
                 </div>
 
-                <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <QuickActionsCard
                         title="New Diagnosis"
                         description="Submit a new plant diagnosis"
@@ -152,13 +152,7 @@ const confidenceMeta = (score: RecentDiagnosis["confidence_score"]) => {
                         href="/client/reports"
                         :class="' bg-orange-300 text-slate-700'"
                     />
-                    <QuickActionsCard
-                        title="Support"
-                        description="Contact our support team for help"
-                        :icon="MessageCircle"
-                        href="/client/support"
-                        :class="' bg-purple-300 text-slate-700'"
-                    />
+      
                     <QuickActionsCard
                         title="Knowledge Hub"
                         description="Browse the disease knowledge base"

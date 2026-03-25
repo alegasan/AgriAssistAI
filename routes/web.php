@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
             ->middleware('can:delete,diagnosis');
         Route::get('/client/knowledgehub', [KnowledgeHubController::class, 'index'])
             ->name('client.knowledgehub');
+        Route::get('/client/knowledgehub/{disease}/image', [KnowledgeHubController::class, 'image'])
+            ->name('client.knowledgehub.image');
         Route::get('/client/profile/{user}', [ProfileController::class, 'show'])
             ->middleware('can:view,user')
             ->name('client.profile');

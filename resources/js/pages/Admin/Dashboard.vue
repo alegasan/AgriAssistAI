@@ -42,7 +42,7 @@ defineProps<{
                     <span class="text-emerald-600">Quick Actions</span>
                 </div>
 
-                <div class="space-y-3">
+                <div class="space-x-1">
                     <QuickActionsCard
                         title="Manage Users"
                         description="View and manage all accounts"

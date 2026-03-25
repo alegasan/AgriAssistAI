@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Diagnosis;
+use App\Models\Disease;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Client\RequestException;
@@ -37,7 +38,7 @@ class DiagnoseService
         $imagePath = $this->storeImage($user, $image);
         $aiResult = $this->requestAiDiagnosis($image, $plantName);
 
-        return Diagnosis::create([
+        $diagnosis = Diagnosis::create([
             'user_id' => $user->id,
             'image_path' => $imagePath,
             'status' => Diagnosis::STATUS_COMPLETED,
@@ -49,6 +50,10 @@ class DiagnoseService
             'completed_at' => Carbon::now(),
             'raw_ai_response' => $aiResult['raw_ai_response'] ?? null,
         ]);
+
+        $this->syncDiseaseCatalog($diagnosis);
+
+        return $diagnosis;
     }
 
     public function createPendingDiagnosis(User $user, UploadedFile $image, ?string $plantName = null): Diagnosis
@@ -100,7 +105,64 @@ class DiagnoseService
             'completed_at' => Carbon::now(),
         ]);
 
-        return $diagnosis->refresh();
+        $diagnosis->refresh();
+        $this->syncDiseaseCatalog($diagnosis);
+
+        return $diagnosis;
+    }
+
+    private function syncDiseaseCatalog(Diagnosis $diagnosis): void
+    {
+        if (! $diagnosis->disease_name) {
+            return;
+        }
+
+        $normalizedName = $this->normalizeDiseaseName($diagnosis->disease_name);
+
+        if ($normalizedName === '') {
+            return;
+        }
+
+        $displayName = $this->normalizeDisplayName($diagnosis->disease_name);
+
+        $updates = [
+            'name' => $displayName,
+            'last_diagnosed_at' => Carbon::now(),
+        ];
+
+        if ($diagnosis->symptoms) {
+            $updates['symptoms'] = $diagnosis->symptoms;
+        }
+
+        if ($diagnosis->treatment) {
+            $updates['treatment'] = $diagnosis->treatment;
+        }
+
+        $disease = Disease::query()->firstOrNew(['normalized_name' => $normalizedName]);
+
+        if (! $disease->exists) {
+            $disease->total_diagnoses = 0;
+        }
+
+        if ($diagnosis->image_path && empty($disease->image_path)) {
+            $updates['image_path'] = $diagnosis->image_path;
+        }
+
+        $disease->fill($updates);
+        $disease->save();
+        $disease->increment('total_diagnoses');
+    }
+
+    private function normalizeDiseaseName(string $name): string
+    {
+        $collapsed = preg_replace('/\s+/', ' ', trim($name)) ?? trim($name);
+
+        return mb_strtolower($collapsed);
+    }
+
+    private function normalizeDisplayName(string $name): string
+    {
+        return preg_replace('/\s+/', ' ', trim($name)) ?? trim($name);
     }
 
     private function storeImage(User $user, UploadedFile $image): string

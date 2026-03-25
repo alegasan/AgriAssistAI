@@ -54,8 +54,7 @@ test('stream returns a response with headers', function () {
     $response = $service->stream($disease);
 
     $storage = Storage::disk('diagnose');
-    $storage->mimeType($path);
-    $expectedMimeType = 'application/octet-stream';
+    $expectedMimeType = $storage->mimeType($path) ?: 'application/octet-stream';
 
     expect($response)->toBeInstanceOf(Symfony\Component\HttpFoundation\StreamedResponse::class);
     expect($response->headers->get('Content-Type'))->toBe($expectedMimeType);

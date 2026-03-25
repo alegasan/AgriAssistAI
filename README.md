@@ -10,7 +10,7 @@ AgriAssistAI is an intelligent plant health monitoring and disease diagnosis sys
 
 ## Tech Stack
 - **Backend**: Laravel (PHP 8+)
-- **Frontend**: TypeScript / React with Inertia.js
+- **Frontend**: Vue.js with Inertia.js
 - **Styling**: Tailwind CSS
 - **Build Tool**: Vite
 - **Database**: MySQL

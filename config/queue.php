@@ -126,4 +126,6 @@ return [
         'table' => 'failed_jobs',
     ],
 
+    'diagnosis_stale_processing_seconds' => (int) env('DIAGNOSIS_STALE_PROCESSING_SECONDS', 180),
+
 ];

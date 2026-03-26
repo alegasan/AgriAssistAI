@@ -5,6 +5,7 @@ use App\Models\Diagnosis;
 use App\Models\User;
 use App\Services\DiagnoseService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -132,6 +133,81 @@ it('marks diagnosis as failed when queued analysis throws', function () {
 
     expect(fn () => (new ProcessDiagnosisJob($diagnosis->id))->handle(app(DiagnoseService::class)))
         ->toThrow(\RuntimeException::class);
+
+    $diagnosis->refresh();
+
+    expect($diagnosis->status)->toBe(Diagnosis::STATUS_FAILED);
+    expect($diagnosis->failure_reason)->not->toBeNull();
+});
+
+it('reclaims stale processing diagnosis records and completes them', function () {
+    Storage::fake('local');
+
+    Http::fake([
+        'https://generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [
+                [
+                    'content' => [
+                        'parts' => [
+                            [
+                                'text' => json_encode([
+                                    'plant_name' => 'Tomato',
+                                    'disease_name' => 'Leaf Spot',
+                                    'confidence_score' => 82,
+                                    'symptoms' => 'Brown circular spots',
+                                    'treatment' => 'Prune affected leaves and apply fungicide',
+                                ]),
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ], 200),
+    ]);
+
+    config()->set('services.gemini.api_key', 'test-key');
+    config()->set('services.diagnose_uploads.disk', 'local');
+
+    $user = User::factory()->create([
+        'role' => 'user',
+        'username' => 'diagnose-stale-processing',
+    ]);
+
+    $image = UploadedFile::fake()->image('leaf-job-stale.jpg');
+    $path = $image->store("diagnoses/{$user->id}", 'local');
+
+    $diagnosis = Diagnosis::query()->create([
+        'user_id' => $user->id,
+        'image_path' => $path,
+        'status' => Diagnosis::STATUS_PROCESSING,
+        'attempted_at' => Carbon::now()->subMinutes(10),
+        'plant_name' => 'Tomato',
+    ]);
+
+    (new ProcessDiagnosisJob($diagnosis->id))->handle(app(DiagnoseService::class));
+
+    $diagnosis->refresh();
+
+    expect($diagnosis->status)->toBe(Diagnosis::STATUS_COMPLETED);
+    expect($diagnosis->disease_name)->toBe('Leaf Spot');
+    expect($diagnosis->completed_at)->not->toBeNull();
+});
+
+it('marks diagnosis as failed in failed callback when still processing', function () {
+    $user = User::factory()->create([
+        'role' => 'user',
+        'username' => 'diagnose-failed-callback',
+    ]);
+
+    $diagnosis = Diagnosis::query()->create([
+        'user_id' => $user->id,
+        'image_path' => "diagnoses/{$user->id}/leaf-failed-callback.jpg",
+        'status' => Diagnosis::STATUS_PROCESSING,
+        'attempted_at' => Carbon::now(),
+        'plant_name' => 'Tomato',
+    ]);
+
+    (new ProcessDiagnosisJob($diagnosis->id))->failed(new RuntimeException('worker timeout'));
 
     $diagnosis->refresh();
 

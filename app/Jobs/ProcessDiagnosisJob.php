@@ -15,6 +15,8 @@ class ProcessDiagnosisJob implements ShouldQueue
     private const USER_FACING_FAILURE_MESSAGE = 'Unable to complete diagnosis right now. Please try again in a moment.';
 
     public int $tries = 3;
+    public int $timeout = 120;
+    public bool $failOnTimeout = true;
 
     /**
      * @var array<int, int>
@@ -37,9 +39,17 @@ class ProcessDiagnosisJob implements ShouldQueue
             return;
         }
 
+        $staleProcessingSeconds = max(1, (int) config('queue.diagnosis_stale_processing_seconds', 180));
+        $staleProcessingCutoff = Carbon::now()->subSeconds($staleProcessingSeconds);
+
         $updated = Diagnosis::query()
             ->where('id', $this->diagnosisId)
-            ->whereNotIn('status', [Diagnosis::STATUS_COMPLETED, Diagnosis::STATUS_PROCESSING])
+            ->where('status', '!=', Diagnosis::STATUS_COMPLETED)
+            ->where(function ($query) use ($staleProcessingCutoff): void {
+                $query->where('status', '!=', Diagnosis::STATUS_PROCESSING)
+                    ->orWhereNull('attempted_at')
+                    ->orWhere('attempted_at', '<=', $staleProcessingCutoff);
+            })
             ->update([
                 'status' => Diagnosis::STATUS_PROCESSING,
                 'attempted_at' => Carbon::now(),
@@ -63,5 +73,16 @@ class ProcessDiagnosisJob implements ShouldQueue
 
             throw $exception;
         }
+    }
+
+    public function failed(?\Throwable $exception): void
+    {
+        Diagnosis::query()
+            ->where('id', $this->diagnosisId)
+            ->whereNotIn('status', [Diagnosis::STATUS_COMPLETED, Diagnosis::STATUS_FAILED])
+            ->update([
+                'status' => Diagnosis::STATUS_FAILED,
+                'failure_reason' => self::USER_FACING_FAILURE_MESSAGE,
+            ]);
     }
 }

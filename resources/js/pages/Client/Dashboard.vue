@@ -8,11 +8,8 @@ import {
     ShieldCheck,
     Sun,
 } from "lucide-vue-next";
-import { ref, onMounted } from "vue";
 import ClientNavbar from "@/components/Client/ClientNavbar.vue";
 import QuickActionsCard from "@/components/Client/QuickActionsCard.vue";
-import WeatherCard from "@/components/Client/WeatherCard.vue";
-import WeatherForecast from "@/components/Client/WeatherForecast.vue";
 
 type RecentDiagnosis = {
     id: number | string;
@@ -26,22 +23,6 @@ type RecentDiagnosis = {
 const page = usePage();
 const user = page.props.auth?.user ?? null;
 const recentDiagnoses = (page.props.recentDiagnoses ?? []) as RecentDiagnosis[];
-
-const weatherLoading = ref(true);
-const currentWeather = ref<any | null>(null);
-
-async function fetchCurrentWeather() {
-    try {
-        const res = await fetch('/client/weather/current');
-        const json = await res.json();
-        if (json.success) currentWeather.value = json.data;
-    } catch {
-    } finally {
-        weatherLoading.value = false;
-    }
-}
-
-onMounted(() => void fetchCurrentWeather());
 
 const statusMeta: Record<string, { label: string; icon: typeof ShieldCheck; iconClass: string; badgeClass: string }> = {
     pending: {
@@ -106,28 +87,17 @@ const confidenceMeta = (score: RecentDiagnosis["confidence_score"]) => {
                     <div class="space-y-2 text-white">
                         <p class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100">Welcome back</p>
                         <h1 class="text-2xl font-bold tracking-tight md:text-3xl">{{ user?.name ?? "there" }}</h1>
-                        <div v-if="weatherLoading" class="space-y-2">
-                            <div class="h-8 w-48 rounded-full bg-white/30 animate-pulse"></div>
-                            <div class="h-4 w-32 rounded-full bg-white/20 animate-pulse"></div>
-                        </div>
-                        <div v-else-if="currentWeather" class="space-y-1">
-                            <p class="text-3xl font-extrabold tracking-tight md:text-4xl">
-                                {{ currentWeather.temperature }}&deg;C - {{ currentWeather.condition }}
-                            </p>
-                            <p class="text-sm text-emerald-50/90">
-                                {{ currentWeather.description }} · {{ currentWeather.humidity }}% humidity
-                            </p>
-                        </div>
-                        <div v-else class="space-y-1">
-                            <p class="text-3xl font-extrabold tracking-tight md:text-4xl">Weather unavailable</p>
-                            <p class="text-sm text-emerald-50/90">Check your API key or try again later.</p>
-                        </div>
+                        <p class="text-sm text-emerald-50/90">
+                            Monitor plant health trends, submit diagnoses, and track outcomes from one place.
+                        </p>
                     </div>
 
-                    <div class="flex flex-col gap-3">
-                        <WeatherCard />
-                        <WeatherForecast />
-                    </div>
+                    <Link
+                        href="/client/diagnose"
+                        class="inline-flex items-center justify-center rounded-full bg-white px-5 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+                    >
+                        Start New Diagnosis
+                    </Link>
                 </div>
             </section>
 

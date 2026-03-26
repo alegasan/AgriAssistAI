@@ -16,7 +16,6 @@ use App\Http\Controllers\Client\ReportController;
 use App\Http\Controllers\Client\SupportController;
 use App\Http\Controllers\Client\KnowledgeHubController;
 use App\Http\Controllers\Client\ProfileController;
-use App\Http\Controllers\Client\WeatherController;
 
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -98,9 +97,5 @@ Route::middleware('auth')->group(function () {
             ->middleware('can:update,user')
             ->middleware('throttle:password-update')
             ->name('client.profile.password.update');
-        Route::get('/client/weather/current', [WeatherController::class, 'current'])
-            ->name('client.weather.current');
-        Route::get('/client/weather/forecast', [WeatherController::class, 'forecast'])
-            ->name('client.weather.forecast');
     });
 });

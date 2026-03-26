@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router } from "@inertiajs/vue3";
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { route } from "ziggy-js";
 import ClientDashboard from "@/layouts/Client/ClientDashboard.vue";
 
@@ -42,6 +42,8 @@ const searchQuery = ref(props.filters?.search ?? "");
 const searchDebounceTimeout = ref<number | null>(null);
 const isSyncingFromServer = ref(false);
 const isLoading = ref(false);
+const selectedImageUrl = ref<string | null>(null);
+const selectedImageAlt = ref("Disease image");
 
 const requestDiseases = (): void => {
     const trimmedSearch = searchQuery.value.trim();
@@ -94,6 +96,21 @@ const decodeHtmlEntities = (value: string): string => {
     return textarea.value;
 };
 
+const openImagePreview = (imageUrl: string, alt: string): void => {
+    selectedImageUrl.value = imageUrl;
+    selectedImageAlt.value = alt;
+};
+
+const closeImagePreview = (): void => {
+    selectedImageUrl.value = null;
+};
+
+const handleEscapeKey = (event: KeyboardEvent): void => {
+    if (event.key === "Escape" && selectedImageUrl.value) {
+        closeImagePreview();
+    }
+};
+
 watch(
     () => searchQuery.value,
     () => {
@@ -128,10 +145,24 @@ watch(
     },
 );
 
+watch(
+    () => selectedImageUrl.value,
+    (incomingImageUrl) => {
+        document.body.classList.toggle("overflow-hidden", Boolean(incomingImageUrl));
+    },
+);
+
+onMounted(() => {
+    window.addEventListener("keydown", handleEscapeKey);
+});
+
 onBeforeUnmount(() => {
     if (searchDebounceTimeout.value !== null) {
         window.clearTimeout(searchDebounceTimeout.value);
     }
+
+    document.body.classList.remove("overflow-hidden");
+    window.removeEventListener("keydown", handleEscapeKey);
 });
 </script>
 
@@ -159,26 +190,35 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid items-start gap-5 md:grid-cols-2">
             <article
                 v-for="disease in diseases.data"
                 :key="disease.id"
-                class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
-                <div class="relative h-40 w-full bg-slate-100">
+                <div class="relative w-full min-h-[16rem] bg-slate-100">
                     <img
                         v-if="disease.image_url"
                         :src="disease.image_url"
                         :alt="disease.name ?? 'Disease image'"
-                        class="h-full w-full object-cover"
+                        class="block h-auto w-full max-h-[26rem] object-contain"
                         loading="lazy"
+                        decoding="async"
                     />
+                    <button
+                        v-if="disease.image_url"
+                        type="button"
+                        class="absolute bottom-2 right-2 rounded-lg bg-slate-900/80 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm backdrop-blur transition hover:bg-slate-900"
+                        @click="openImagePreview(disease.image_url, disease.name ?? 'Disease image')"
+                    >
+                        View full image
+                    </button>
                     <div v-else class="flex h-full items-center justify-center text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
                         No image
                     </div>
                 </div>
 
-                <div class="flex flex-1 flex-col gap-4 p-5">
+                <div class="flex flex-col gap-4 p-5">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div>
                             <h3 class="text-lg font-extrabold tracking-tight text-slate-900">
@@ -242,6 +282,30 @@ onBeforeUnmount(() => {
                         :class="link.active ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : ''"
                     >{{ decodeHtmlEntities(link.label) }}</Link>
                 </template>
+            </div>
+        </div>
+
+        <div
+            v-if="selectedImageUrl"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4"
+            role="dialog"
+            aria-modal="true"
+            @click.self="closeImagePreview"
+        >
+            <div class="relative w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
+                <button
+                    type="button"
+                    class="absolute right-2 top-2 z-10 rounded-full bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-slate-700"
+                    @click="closeImagePreview"
+                >
+                    Close
+                </button>
+                <img
+                    :src="selectedImageUrl"
+                    :alt="selectedImageAlt"
+                    class="max-h-[82vh] w-full rounded-xl object-contain"
+                    decoding="async"
+                />
             </div>
         </div>
     </section>

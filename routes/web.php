@@ -88,6 +88,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/client/profile/{user}', [ProfileController::class, 'show'])
             ->middleware('can:view,user')
             ->name('client.profile');
+        Route::get('/client/profile/{user}/avatar', [ProfileController::class, 'avatar'])
+            ->middleware('can:view,user')
+            ->name('client.profile.avatar.show');
+        Route::post('/client/profile/{user}/avatar', [ProfileController::class, 'uploadAvatar'])
+            ->middleware('can:update,user')
+            ->name('client.profile.avatar.upload');
         Route::get('/client/weather/current', [WeatherController::class, 'current'])
             ->name('client.weather.current');
         Route::get('/client/weather/forecast', [WeatherController::class, 'forecast'])

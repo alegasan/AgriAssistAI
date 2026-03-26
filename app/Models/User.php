@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -67,6 +68,19 @@ class User extends Authenticatable
     public function getCreatedAtFormattedAttribute(): ?string
     {
         return $this->created_at?->format('M d, Y');
+    }
+
+    public function getAvatarAttribute(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL) !== false) {
+            return $value;
+        }
+
+        return Storage::disk('public')->url($value);
     }
 
     

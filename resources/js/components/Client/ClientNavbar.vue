@@ -24,6 +24,25 @@ const handleLogout = () => {
     logoutForm.post(route("logout"))
 }
 const page = usePage()
+const userAvatarUrl = computed(() => {
+    const avatar = page.props.auth.user.avatar
+
+    if (typeof avatar !== 'string' || avatar.trim() === '') {
+        return ''
+    }
+
+    return route('client.profile.avatar.show', page.props.auth.user.id)
+})
+const userInitial = computed(() => {
+    const name = String(page.props.auth.user.name ?? '').trim()
+
+    return name ? name.charAt(0).toUpperCase() : 'U'
+})
+const avatarLoadError = ref(false)
+
+watch(userAvatarUrl, () => {
+    avatarLoadError.value = false
+})
 
 const flash = computed(() => (page.props.flash ?? {}) as { success?: string })
 const showSuccessToast = ref(false)
@@ -82,18 +101,20 @@ onBeforeUnmount(() => {
             </nav>
 
             <div class="flex items-center gap-3">
-                <button type="button"
-                    class="relative grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-600"
-                    aria-label="Notifications">
-                    <span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500"></span>
-                    <Bell class="h-5 w-5" aria-hidden="true" />
-                </button>
 
                 <Link :href="route('client.profile', page.props.auth.user.id)"
                     class="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 sm:flex cursor-pointer">
                     <div
-                        class="grid h-8 w-8 place-items-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
-                        {{ page.props.auth.user.name.charAt(0).toUpperCase() }}
+                        class="grid h-8 w-8 place-items-center overflow-hidden rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+                        <img
+                            v-if="userAvatarUrl && !avatarLoadError"
+                            :src="userAvatarUrl"
+                            alt="User avatar"
+                            class="h-full w-full object-cover"
+                            @error="avatarLoadError = true"
+                            @load="avatarLoadError = false"
+                        />
+                        <span v-else>{{ userInitial }}</span>
                     </div>
                     <p class="text-sm font-semibold text-slate-900">{{ page.props.auth.user.name }}</p>
                 </Link>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ActivityAction;
 use App\Models\Diagnosis;
 use App\Models\Disease;
 use App\Models\User;
@@ -16,6 +17,7 @@ class DiagnoseService
 {
     public function __construct(
         private readonly UploadQuotaService $uploadQuotaService,
+        private readonly ActivityLogger $activityLogger,
     ) {
     }
 
@@ -53,6 +55,19 @@ class DiagnoseService
 
         $this->syncDiseaseCatalog($diagnosis);
 
+        $this->activityLogger->log(
+            action: ActivityAction::DiagnosisCompleted,
+            properties: [
+                'diagnosis_id' => $diagnosis->id,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'plant_name' => $diagnosis->plant_name,
+                'disease_name' => $diagnosis->disease_name,
+                'confidence_score' => $diagnosis->confidence_score,
+            ],
+            subject: $diagnosis,
+        );
+
         return $diagnosis;
     }
 
@@ -62,12 +77,25 @@ class DiagnoseService
 
         $imagePath = $this->storeImage($user, $image);
 
-        return Diagnosis::create([
+        $diagnosis = Diagnosis::create([
             'user_id' => $user->id,
             'image_path' => $imagePath,
             'status' => Diagnosis::STATUS_PENDING,
             'plant_name' => $plantName,
         ]);
+
+        $this->activityLogger->log(
+            action: ActivityAction::DiagnosisSubmitted,
+            properties: [
+                'diagnosis_id' => $diagnosis->id,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'plant_name' => $diagnosis->plant_name,
+            ],
+            subject: $diagnosis,
+        );
+
+        return $diagnosis;
     }
 
     public function completeDiagnosis(Diagnosis $diagnosis): Diagnosis
@@ -107,6 +135,19 @@ class DiagnoseService
 
         $diagnosis->refresh();
         $this->syncDiseaseCatalog($diagnosis);
+
+        $this->activityLogger->log(
+            action: ActivityAction::DiagnosisCompleted,
+            properties: [
+                'diagnosis_id' => $diagnosis->id,
+                'user_id' => $diagnosis->user_id,
+                'user_name' => $diagnosis->user?->name,
+                'plant_name' => $diagnosis->plant_name,
+                'disease_name' => $diagnosis->disease_name,
+                'confidence_score' => $diagnosis->confidence_score,
+            ],
+            subject: $diagnosis,
+        );
 
         return $diagnosis;
     }

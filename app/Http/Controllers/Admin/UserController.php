@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Enums\ActivityAction;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
@@ -47,7 +49,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function toggleStatus(User $user)
+    public function toggleStatus(Request $request, User $user, ActivityLogger $activityLogger)
     {
         $this->authorize('toggleStatus', $user);
 
@@ -57,6 +59,18 @@ class UserController extends Controller
 
         $user->is_active = !$user->is_active;
         $user->save();
+
+        $activityLogger->log(
+            action: ActivityAction::AdminUserStatusToggled,
+            properties: [
+                'target_user_id' => $user->id,
+                'target_user_name' => $user->name,
+                'is_active' => (bool) $user->is_active,
+            ],
+            subject: $user,
+            causer: $request->user(),
+            request: $request,
+        );
 
         return response()->json([
             'message' => 'User status updated successfully.',

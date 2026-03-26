@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
 import { useForm } from '@inertiajs/vue3'
+import { ArrowLeft } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { route } from 'ziggy-js'
 import { Button } from '@/components/ui/button'
@@ -46,8 +47,8 @@ const submit = () => {
             href="/"
             class="absolute left-6 top-6 z-10 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 hover:text-emerald-800"
         >
-            <span aria-hidden="true">←</span>
-            Back 
+            <ArrowLeft class="size-4" aria-hidden="true" />
+            Back
         </Link>
         <div class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
         <div class="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-emerald-100/70 blur-3xl" />
@@ -59,24 +60,24 @@ const submit = () => {
                         Join AgriAssist AI Today
                     </span>
                     <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 xl:text-5xl">
-                        Build a healthier farm with smarter decisions.
+                        Diagnose plant issues with smarter decisions.
                     </h1>
                     <p class="max-w-lg text-base leading-relaxed text-slate-600">
-                        Create your account to unlock AI-powered plant diagnostics, treatment guidance, and continuous crop monitoring.
+                        Create your account to upload plant photos for AI diagnosis, track queued analysis status, and review results with confidence, symptoms, and treatment.
                     </p>
 
                     <div class="grid max-w-md gap-3 text-sm text-slate-600">
                         <div class="flex items-center gap-2 rounded-xl border border-emerald-100 bg-white/80 px-3 py-2 shadow-sm">
                             <span class="h-2 w-2 rounded-full bg-emerald-500" />
-                            Unlimited health scan history
+                            Upload plant photos for AI diagnosis
                         </div>
                         <div class="flex items-center gap-2 rounded-xl border border-emerald-100 bg-white/80 px-3 py-2 shadow-sm">
                             <span class="h-2 w-2 rounded-full bg-emerald-500" />
-                            Actionable treatment recommendations
+                            Queue-based analysis with live status
                         </div>
                         <div class="flex items-center gap-2 rounded-xl border border-emerald-100 bg-white/80 px-3 py-2 shadow-sm">
                             <span class="h-2 w-2 rounded-full bg-emerald-500" />
-                            Early prevention and care alerts
+                            Diagnosis history with confidence & treatment
                         </div>
                     </div>
                 </div>

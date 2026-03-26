@@ -10,19 +10,55 @@ import CardInfo from "@/components/CardInfo.vue";
 import QuickActionsCard from "@/components/Client/QuickActionsCard.vue";
 import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
 
+type RecentActivityItem = {
+    id: number
+    action: string
+    message: string
+    icon_key: string
+    occurred_at: string | null
+    occurred_at_human: string | null
+}
+
 defineProps<{
     stats: {
         farmers:   { total: number; new_today: number }
         diseases:  { total: number | null; new_today: number | null }
         diagnoses: { total: number; new_today: number }
     }
+    recentActivity?: RecentActivityItem[]
 }>()
+
+function activityIcon(iconKey: string) {
+    switch (iconKey) {
+        case "users":
+            return Users
+        case "clipboard":
+            return ClipboardList
+        case "user-cog":
+            return UserCog
+        default:
+            return Clock
+    }
+}
+
+function activityBadgeClasses(iconKey: string) {
+    switch (iconKey) {
+        case "users":
+            return "bg-emerald-100 text-emerald-700"
+        case "clipboard":
+            return "bg-amber-100 text-amber-600"
+        case "user-cog":
+            return "bg-emerald-100 text-emerald-700"
+        default:
+            return "bg-slate-100 text-slate-600"
+    }
+}
 </script>
 
 
 <template>
 
-    <AdminDashboard :title="'Admin Dashboard'" :description="'Heres an overview of the latest stats and activity on PlantGuard AI.'">
+    <AdminDashboard :title="'Admin Dashboard'" :description="'Here\'s an overview of the latest stats and activity on AgriAssist AI.'">
 
         <div class="mt-8 grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <CardInfo title="Total Users" :value="(stats?.farmers?.total ?? 0).toLocaleString()"  :change="`+${stats?.farmers?.new_today ?? 0}`" description="Total registered farmers" :icon="Users" />
@@ -79,37 +115,28 @@ defineProps<{
 
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div class="space-y-0 divide-y divide-slate-100">
-                        <div class="flex items-center gap-4 px-5 py-4">
-                            <div class="grid h-10 w-10 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                                <Users class="h-5 w-5" aria-hidden="true" />
+                        <template v-if="recentActivity?.length">
+                            <div v-for="item in recentActivity" :key="item.id" class="flex items-center gap-4 px-5 py-4">
+                                <div
+                                    class="grid h-10 w-10 place-items-center rounded-full"
+                                    :class="activityBadgeClasses(item.icon_key)"
+                                >
+                                    <component :is="activityIcon(item.icon_key)" class="h-5 w-5" aria-hidden="true" />
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">{{ item.message }}</p>
+                                    <p class="text-xs text-slate-500">{{ item.occurred_at_human ?? "—" }}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-sm font-semibold text-slate-900">New farmer registered: Suresh Patel</p>
-                                <p class="text-xs text-slate-500">5 min ago</p>
-                            </div>
-                        </div>
+                        </template>
 
-                        <div class="flex items-center gap-4 px-5 py-4">
-                            <div class="grid h-10 w-10 place-items-center rounded-full bg-amber-100 text-amber-600">
-                                <ClipboardList class="h-5 w-5" aria-hidden="true" />
+                        <div v-else class="flex items-center gap-4 px-5 py-4">
+                            <div class="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-slate-600">
+                                <Clock class="h-5 w-5" aria-hidden="true" />
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-slate-900">Diagnosis submitted for Rice - Leaf
-                                    Blight
-                                </p>
-                                <p class="text-xs text-slate-500">12 min ago</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-4 px-5 py-4">
-                            <div class="grid h-10 w-10 place-items-center rounded-full bg-amber-100 text-amber-600">
-                                <Biohazard class="h-5 w-5" aria-hidden="true" />
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-slate-900">Disease entry updated: Tomato Mosaic
-                                    Virus
-                                </p>
-                                <p class="text-xs text-slate-500">1 hour ago</p>
+                                <p class="text-sm font-semibold text-slate-900">No recent activity yet</p>
+                                <p class="text-xs text-slate-500">—</p>
                             </div>
                         </div>
                     </div>

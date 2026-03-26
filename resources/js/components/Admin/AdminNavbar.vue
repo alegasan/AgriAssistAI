@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useForm } from "@inertiajs/vue3";
 import { Link } from "@inertiajs/vue3"
-import { Bell, Leaf } from "lucide-vue-next"
+import { Leaf } from "lucide-vue-next"
 import { route } from "ziggy-js";
 import AlertDialog from "@/components/AlertDialog.vue"
 const navItems = [
@@ -38,14 +38,7 @@ const handleLogout = () => {
             </nav>
 
             <div class="flex items-center gap-3">
-                <button
-                    type="button"
-                    class="relative grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
-                    aria-label="Notifications"
-                >
-                    <span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500"></span>
-                    <Bell class="h-5 w-5" aria-hidden="true" />
-                </button>
+           
 
                 <div class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 shadow-sm">
                     <div class="grid h-8 w-8 place-items-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">

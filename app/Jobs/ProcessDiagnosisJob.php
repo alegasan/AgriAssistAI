@@ -2,8 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Enums\ActivityAction;
 use App\Models\Diagnosis;
 use App\Services\DiagnoseService;
+use App\Services\ActivityLogger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
@@ -71,18 +73,54 @@ class ProcessDiagnosisJob implements ShouldQueue
                 'failure_reason' => self::USER_FACING_FAILURE_MESSAGE,
             ]);
 
+            app(ActivityLogger::class)->log(
+                action: ActivityAction::DiagnosisFailed,
+                properties: [
+                    'diagnosis_id' => $diagnosis->id,
+                    'user_id' => $diagnosis->user_id,
+                    'user_name' => $diagnosis->user?->name,
+                    'plant_name' => $diagnosis->plant_name,
+                    'disease_name' => $diagnosis->disease_name,
+                    'failure_reason' => $diagnosis->failure_reason,
+                ],
+                subject: $diagnosis,
+            );
+
             throw $exception;
         }
     }
 
     public function failed(?\Throwable $exception): void
     {
-        Diagnosis::query()
+        $updated = Diagnosis::query()
             ->where('id', $this->diagnosisId)
             ->whereNotIn('status', [Diagnosis::STATUS_COMPLETED, Diagnosis::STATUS_FAILED])
             ->update([
                 'status' => Diagnosis::STATUS_FAILED,
                 'failure_reason' => self::USER_FACING_FAILURE_MESSAGE,
             ]);
+
+        if ($updated === 0) {
+            return;
+        }
+
+        $diagnosis = Diagnosis::query()->with('user:id,name')->find($this->diagnosisId);
+
+        if (! $diagnosis) {
+            return;
+        }
+
+        app(ActivityLogger::class)->log(
+            action: ActivityAction::DiagnosisFailed,
+            properties: [
+                'diagnosis_id' => $diagnosis->id,
+                'user_id' => $diagnosis->user_id,
+                'user_name' => $diagnosis->user?->name,
+                'plant_name' => $diagnosis->plant_name,
+                'disease_name' => $diagnosis->disease_name,
+                'failure_reason' => $diagnosis->failure_reason,
+            ],
+            subject: $diagnosis,
+        );
     }
 }

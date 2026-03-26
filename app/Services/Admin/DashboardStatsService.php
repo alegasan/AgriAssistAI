@@ -22,30 +22,31 @@ class DashboardStatsService
 
     private function farmerStats(): array
     {
-        $data = User::where(function ($query) {
+        $query = User::query()->where(function ($query) {
             $query->whereNull('role')
                 ->orWhere('role', '!=', 'admin');
-        })
-            ->selectRaw('COUNT(*) as total, SUM(DATE(created_at) = CURDATE()) as new_today')
-            ->first();
+        });
 
-        return ['total' => $data->total, 'new_today' => $data->new_today ?? 0];
+        $total = (clone $query)->count();
+        $newToday = (clone $query)->whereDate('created_at', today())->count();
+
+        return ['total' => $total, 'new_today' => $newToday];
     }
 
     private function diseaseStats(): array
     {
-        $data = Disease::selectRaw('COUNT(*) as total, SUM(DATE(created_at) = CURDATE()) as new_today')
-            ->first();
+        $total = Disease::query()->count();
+        $newToday = Disease::query()->whereDate('created_at', today())->count();
 
-        return ['total' => $data->total, 'new_today' => $data->new_today ?? 0];
+        return ['total' => $total, 'new_today' => $newToday];
     }
 
     private function diagnosisStats(): array
     {
-        $data = Diagnosis::selectRaw('COUNT(*) as total, SUM(DATE(created_at) = CURDATE()) as new_today')
-            ->first();
+        $total = Diagnosis::query()->count();
+        $newToday = Diagnosis::query()->whereDate('created_at', today())->count();
 
-        return ['total' => $data->total, 'new_today' => $data->new_today ?? 0];
+        return ['total' => $total, 'new_today' => $newToday];
     }
 
 

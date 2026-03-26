@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Observers\UserObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureRateLimiting();
+        $this->configureObservers();
     }
 
     /**
@@ -85,6 +88,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perHour(5)->by($key);
         });
         
+    }
+
+    protected function configureObservers(): void
+    {
+        User::observe(UserObserver::class);
     }
 
  

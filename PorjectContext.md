@@ -184,6 +184,17 @@ plantdoc/
 
 ## Database Schema
 
+## Privacy & retention
+
+### Activity log PII (IP address, user agent)
+
+The `activities` table includes `ip_address` and `user_agent` for security/auditing.
+
+- **Lawful basis (GDPR):** legitimate interests (security/audit trail) and, where applicable, compliance with legal obligations.
+- **Retention:** these fields are retained for a configurable period and then **anonymized (set to `null`)** or **deleted**.
+- **Configuration:** `ACTIVITY_PII_RETENTION_DAYS` (default `30`) and `ACTIVITY_PII_RETENTION_ACTION` (`anonymize` or `delete`).
+- **Enforcement:** scheduled command `activities:apply-pii-retention` (see `routes/console.php`).
+
 ### `users`
 | Column | Type | Notes |
 |--------|------|-------|

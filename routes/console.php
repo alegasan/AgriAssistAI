@@ -31,3 +31,7 @@ Artisan::command('diagnoses:mark-stale-failed', function () {
 Schedule::command('diagnoses:mark-stale-failed')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command(\App\Console\Commands\ActivitiesPiiRetentionCommand::class)
+    ->daily()
+    ->withoutOverlapping();

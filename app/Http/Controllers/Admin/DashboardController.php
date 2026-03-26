@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Cache;
 use App\Services\Admin\DashboardStatsService;
+use App\Services\Admin\DashboardActivityService;
 
 class DashboardController extends Controller
 {
-    public function index(DashboardStatsService $stats)
+    public function index(DashboardStatsService $stats, DashboardActivityService $activity)
     {
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats->getStats(),
+            'recentActivity' => $activity->recent(10),
         ]);
     }
 }

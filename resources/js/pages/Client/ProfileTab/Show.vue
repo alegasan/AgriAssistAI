@@ -121,7 +121,8 @@ onBeforeUnmount(() => {
 
 <template>
         <ClientDashboard :title="'Profile'" :description="'Manage your profile information and settings.'">
-                <section class="mx-auto flex w-full max-w-4xl flex-col gap-5">
+                <section class="mx-auto mt-4 w-full max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+                        <div class="mx-auto flex w-full max-w-4xl flex-col gap-5">
                         <div
                                 class="overflow-hidden rounded-3xl border border-emerald-100/70 bg-gradient-to-br from-white via-emerald-50/50 to-slate-50 p-6 shadow-xl">
                                 <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -307,6 +308,7 @@ onBeforeUnmount(() => {
                                         </form>
 
                                 </div>
+                        </div>
                         </div>
                 </section>
         </ClientDashboard>

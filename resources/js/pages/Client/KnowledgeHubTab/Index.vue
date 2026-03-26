@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
 
     <section class="mx-auto w-full max-w-6xl space-y-6 px-4 pb-16 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div class="min-w-[16rem] flex-1">
+            <div class="min-w-0 w-full sm:min-w-[16rem] sm:flex-1">
                 <label class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                     Search diseases
                 </label>

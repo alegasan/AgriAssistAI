@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useForm, usePage } from "@inertiajs/vue3"
 import { Link } from "@inertiajs/vue3"
-import { CircleCheckBig, Leaf } from "lucide-vue-next"
+import { CircleCheckBig, Leaf, Menu } from "lucide-vue-next"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { route } from "ziggy-js"
 import AlertDialog from "@/components/AlertDialog.vue"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 
 const navItems = [
@@ -47,6 +48,16 @@ watch(userAvatarUrl, () => {
 const flash = computed(() => (page.props.flash ?? {}) as { success?: string })
 const showSuccessToast = ref(false)
 
+const isMobileMenuOpen = ref(false)
+
+const setMobileMenuOpen = (value: boolean): void => {
+    isMobileMenuOpen.value = value
+}
+
+const closeMobileMenu = (): void => {
+    setMobileMenuOpen(false)
+}
+
 let hideTimer: number | null = null
 
 const clearHideTimer = (): void => {
@@ -83,7 +94,7 @@ onBeforeUnmount(() => {
 
 <template>
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white">
-        <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-3 py-4">
+        <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3">
                 <div class="grid h-10 w-10 place-items-center rounded-full bg-emerald-600 text-white">
                     <Leaf class="h-5 w-5" aria-hidden="true" />
@@ -101,6 +112,57 @@ onBeforeUnmount(() => {
             </nav>
 
             <div class="flex items-center gap-3">
+
+                <button
+                    type="button"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 md:hidden"
+                    aria-label="Open menu"
+                    @click="setMobileMenuOpen(true)"
+                >
+                    <Menu class="h-5 w-5" aria-hidden="true" />
+                </button>
+
+                <Sheet :open="isMobileMenuOpen" @update:open="setMobileMenuOpen">
+                    <SheetContent side="left" class="border-r border-slate-200 bg-white p-0">
+                        <SheetHeader class="border-b border-slate-200">
+                            <SheetTitle class="text-lg font-extrabold tracking-tight text-slate-900">Menu</SheetTitle>
+                        </SheetHeader>
+
+                        <nav class="flex flex-col gap-1 p-4">
+                            <Link
+                                v-for="item in navItems"
+                                :key="item.label"
+                                :href="item.href"
+                                class="flex w-full items-center rounded-xl px-4 py-3 text-sm font-semibold transition"
+                                :class="isActive(item.routeName)
+                                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                    : 'text-slate-700 hover:bg-slate-50'"
+                                @click="closeMobileMenu"
+                            >
+                                {{ item.label }}
+                            </Link>
+
+                            <Link
+                                :href="route('client.profile', page.props.auth.user.id)"
+                                class="flex w-full items-center rounded-xl px-4 py-3 text-sm font-semibold transition"
+                                :class="isActive('client.profile')
+                                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                    : 'text-slate-700 hover:bg-slate-50'"
+                                @click="closeMobileMenu"
+                            >
+                                Profile
+                            </Link>
+
+                            <button
+                                type="button"
+                                class="flex w-full items-center rounded-xl px-4 py-3 text-left text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+                                @click="handleLogout(); closeMobileMenu()"
+                            >
+                                Logout
+                            </button>
+                        </nav>
+                    </SheetContent>
+                </Sheet>
 
                 <Link :href="route('client.profile', page.props.auth.user.id)"
                     class="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 sm:flex cursor-pointer">

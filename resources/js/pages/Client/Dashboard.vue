@@ -73,7 +73,7 @@ const confidenceMeta = (score: RecentDiagnosis["confidence_score"]) => {
     <div class="min-h-screen bg-slate-50">
         <ClientNavbar />
 
-        <main class="mx-auto w-full max-w-6xl px-4 pb-16 pt-8">
+        <main class="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
             <section
                 class="relative overflow-hidden rounded-3xl border border-emerald-200/60 bg-emerald-700/10 px-6 py-8 shadow-sm"
             >

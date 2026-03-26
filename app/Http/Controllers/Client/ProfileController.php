@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileAvatarUploadRequest;
+use App\Http\Requests\ProfilePasswordUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -93,5 +95,16 @@ class ProfileController extends Controller
         ]);
 
         return back()->with('success', 'Profile photo updated successfully.');
+    }
+
+    public function updatePassword(ProfilePasswordUpdateRequest $request, User $user): RedirectResponse
+    {
+        abort_unless($request->user()?->is($user), 403);
+
+        $user->update([
+            'password' => Hash::make($request->validated('password')),
+        ]);
+
+        return back()->with('success', 'Password updated successfully.');
     }
 }

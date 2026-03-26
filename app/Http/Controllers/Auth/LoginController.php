@@ -23,6 +23,16 @@ class LoginController extends Controller
             $request->session()->regenerate();
             $user = auth()->user();
 
+            if (! $user->is_active) {
+                auth()->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'login' => 'Your account has been deactivated. Please contact support.',
+                ])->onlyInput('login');
+            }
+
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             }

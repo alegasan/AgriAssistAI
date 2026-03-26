@@ -76,6 +76,14 @@ class AppServiceProvider extends ServiceProvider
 
             return $limits;
         });
+
+        RateLimiter::for('password-update', function (Request $request) {
+            $key = $request->user() !== null
+                ? 'password-update:user:'.$request->user()->id
+                : 'password-update:ip:'.$request->ip();
+
+            return Limit::perHour(5)->by($key);
+        });
         
     }
 

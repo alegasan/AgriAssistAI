@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useForm, usePage } from "@inertiajs/vue3";
-import { AtSign, CalendarDays, Camera, Image as ImageIcon, Mail, ShieldCheck, User } from "lucide-vue-next";
+import { AtSign, CalendarDays, Camera, Image as ImageIcon, KeyRound, Mail, ShieldCheck, User } from "lucide-vue-next";
 import { computed, onBeforeUnmount, ref } from "vue";
 import { route } from "ziggy-js";
+import AlertDialog from "@/components/AlertDialog.vue";
 import ClientDashboard from "@/layouts/Client/ClientDashboard.vue";
 
 const props = defineProps<{ user?: Record<string, any> }>();
@@ -14,6 +15,15 @@ const uploadForm = useForm<{ avatar: File | null }>({
         avatar: null,
 });
 
+const passwordForm = useForm({
+        current_password: "",
+        password: "",
+        password_confirmation: "",
+});
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmPassword = ref(false);
+
 const user = computed(() => props.user ?? page.props.auth.user);
 const displayName = computed(() => user.value?.name ?? "—");
 const displayEmail = computed(() => user.value?.email ?? "—");
@@ -22,6 +32,7 @@ const joinDate = computed(() => user.value?.created_at_formatted ?? "—");
 const avatarUrl = computed(() => user.value?.avatar_url ?? user.value?.avatar ?? "");
 const displayedAvatarUrl = computed(() => localPreviewUrl.value ?? avatarUrl.value);
 const uploadProgress = computed(() => Math.round(uploadForm.progress?.percentage ?? 0));
+const requiresCurrentPassword = computed(() => !user.value?.provider);
 
 const clearLocalPreview = (): void => {
         if (localPreviewUrl.value) {
@@ -90,6 +101,19 @@ const uploadAvatar = (): void => {
         });
 };
 
+const updatePassword = (): void => {
+        if (!user.value?.id || passwordForm.processing) {
+                return;
+        }
+
+        passwordForm.put(route("client.profile.password.update", user.value.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                        passwordForm.reset("current_password", "password", "password_confirmation");
+                },
+        });
+};
+
 onBeforeUnmount(() => {
         clearLocalPreview();
 });
@@ -137,11 +161,18 @@ onBeforeUnmount(() => {
                                                                 <ImageIcon class="h-4 w-4" />
                                                                 Choose photo
                                                         </button>
-                                                        <button type="button" @click="uploadAvatar"
-                                                                :disabled="uploadForm.processing || !uploadForm.avatar"
-                                                                class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
-                                                                {{ uploadForm.processing ? "Uploading..." : "Save photo" }}
-                                                        </button>
+                                                        <AlertDialog
+                                                                title="Confirm photo change"
+                                                                description="Your profile photo will be updated. Do you want to continue?"
+                                                                trigger-label="Save photo"
+                                                                confirm-label="Save photo"
+                                                                cancel-label="Cancel"
+                                                                trigger-class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                                                confirm-class="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
+                                                                :trigger-disabled="uploadForm.processing || !uploadForm.avatar"
+                                                                :confirm-disabled="uploadForm.processing"
+                                                                @confirm="uploadAvatar"
+                                                        />
                                                 </div>
                                                 <p v-if="uploadForm.errors.avatar" class="text-xs text-rose-600">{{ uploadForm.errors.avatar }}</p>
                                                 <p v-else class="text-xs text-slate-500">PNG, JPG, or WEBP up to 2MB</p>
@@ -181,19 +212,100 @@ onBeforeUnmount(() => {
                                 </div>
 
                                 <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg">
-                                        <p class="text-sm font-semibold text-slate-900">Photo tips</p>
-                                        <div class="mt-4 space-y-3 text-sm text-slate-600">
-                                                <p>
-                                                        Use a clear, front-facing photo for better recognition across the platform.
+                                        <p class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                                                <KeyRound class="h-4 w-4 text-slate-500" />
+                                                Change password
+                                        </p>
+                                        <form class="mt-4 space-y-3" @submit.prevent>
+                                                <div v-if="requiresCurrentPassword" class="space-y-1.5">
+                                                        <label for="current_password" class="text-xs font-medium text-slate-600">Current password</label>
+                                                        <div class="relative">
+                                                                <input
+                                                                        id="current_password"
+                                                                        v-model="passwordForm.current_password"
+                                                                        :type="showCurrentPassword ? 'text' : 'password'"
+                                                                        autocomplete="current-password"
+                                                                        :disabled="passwordForm.processing"
+                                                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 pr-16 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+                                                                />
+                                                                <button
+                                                                        type="button"
+                                                                        class="absolute top-1/2 right-3 -translate-y-1/2 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                                                                        @click="showCurrentPassword = !showCurrentPassword"
+                                                                >
+                                                                        {{ showCurrentPassword ? "Hide" : "Show" }}
+                                                                </button>
+                                                        </div>
+                                                        <p v-if="passwordForm.errors.current_password" class="text-xs text-rose-600">
+                                                                {{ passwordForm.errors.current_password }}
+                                                        </p>
+                                                </div>
+
+                                                <p v-else class="rounded-lg border border-emerald-100 bg-emerald-50/70 px-3 py-2 text-xs text-emerald-800">
+                                                        Your account was created with Google. You can set a password here to also sign in with email.
                                                 </p>
-                                                <p>
-                                                        Square images usually look best in the avatar frame.
+
+                                                <div class="space-y-1.5">
+                                                        <label for="password" class="text-xs font-medium text-slate-600">New password</label>
+                                                        <div class="relative">
+                                                                <input
+                                                                        id="password"
+                                                                        v-model="passwordForm.password"
+                                                                        :type="showNewPassword ? 'text' : 'password'"
+                                                                        autocomplete="new-password"
+                                                                        :disabled="passwordForm.processing"
+                                                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 pr-16 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+                                                                />
+                                                                <button
+                                                                        type="button"
+                                                                        class="absolute top-1/2 right-3 -translate-y-1/2 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                                                                        @click="showNewPassword = !showNewPassword"
+                                                                >
+                                                                        {{ showNewPassword ? "Hide" : "Show" }}
+                                                                </button>
+                                                        </div>
+                                                        <p v-if="passwordForm.errors.password" class="text-xs text-rose-600">
+                                                                {{ passwordForm.errors.password }}
+                                                        </p>
+                                                </div>
+
+                                                <div class="space-y-1.5">
+                                                        <label for="password_confirmation" class="text-xs font-medium text-slate-600">Confirm new password</label>
+                                                        <div class="relative">
+                                                                <input
+                                                                        id="password_confirmation"
+                                                                        v-model="passwordForm.password_confirmation"
+                                                                        :type="showConfirmPassword ? 'text' : 'password'"
+                                                                        autocomplete="new-password"
+                                                                        :disabled="passwordForm.processing"
+                                                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 pr-16 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+                                                                />
+                                                                <button
+                                                                        type="button"
+                                                                        class="absolute top-1/2 right-3 -translate-y-1/2 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                                                                        @click="showConfirmPassword = !showConfirmPassword"
+                                                                >
+                                                                        {{ showConfirmPassword ? "Hide" : "Show" }}
+                                                                </button>
+                                                        </div>
+                                                <p v-if="passwordForm.errors.password_confirmation" class="text-xs text-rose-600">
+                                                        {{ passwordForm.errors.password_confirmation }}
                                                 </p>
-                                                <p class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700">
-                                                        <ImageIcon class="h-4 w-4" />
-                                                        Changes appear right after a successful upload.
-                                                </p>
-                                        </div>
+                                                </div>
+                                                <AlertDialog
+                                                        title="Confirm password update"
+                                                        description="Your password will be changed and used on your next sign in. Do you want to continue?"
+                                                        trigger-label="Update password"
+                                                        confirm-label="Update password"
+                                                        cancel-label="Cancel"
+                                                        trigger-class="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                                        confirm-class="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
+                                                        :trigger-disabled="passwordForm.processing"
+                                                        :confirm-disabled="passwordForm.processing"
+                                                        @confirm="updatePassword"
+                                                />
+                                        </form>
+
                                 </div>
                         </div>
                 </section>

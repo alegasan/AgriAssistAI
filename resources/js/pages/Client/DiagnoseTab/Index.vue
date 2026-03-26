@@ -62,7 +62,7 @@ const diagnosisStatusTitle = computed(() => {
 
 const diagnosisStatusDescription = computed(() => {
     if (diagnosisStatus.value === 'processing') {
-        return 'Gemini is analyzing your image. This can take a few moments.'
+        return 'AI is analyzing your image. This can take a few moments.'
     }
 
     if (diagnosisStatus.value === 'pending') {
@@ -174,7 +174,6 @@ const fetchDiagnosisStatus = async (diagnosisId: number): Promise<void> => {
         const payload = (await response.json()) as DiagnosisResult
         applyDiagnosisState(payload)
     } catch {
-        // Polling is best effort. Keep trying until success or final state.
     }
 }
 
@@ -334,7 +333,6 @@ const submit = (): void => {
                 return
             }
 
-            // Upload completed: close blocking modal and continue status updates inline.
             finishLoadingProgress()
         },
     })

@@ -57,7 +57,7 @@ const requestUsers = (): void => {
     const trimmedSearch = searchQuery.value.trim();
 
     router.get(
-        route("admin.users.index"),
+        route("admin.users.index", undefined, false),
         {
             search: trimmedSearch !== "" ? trimmedSearch : undefined,
             status: selectedStatus.value !== "all" ? selectedStatus.value : undefined,
@@ -114,7 +114,7 @@ const toggleUserStatus = async (user: UserRow): Promise<void> => {
 
     try {
         try {
-            const response = await window.fetch(route("admin.users.toggle-status", user.id), {
+            const response = await window.fetch(route("admin.users.toggle-status", user.id, false), {
                 method: "PATCH",
                 headers: {
                     Accept: "application/json",

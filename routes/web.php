@@ -94,6 +94,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/client/profile/{user}/avatar', [ProfileController::class, 'uploadAvatar'])
             ->middleware('can:update,user')
             ->name('client.profile.avatar.upload');
+        Route::put('/client/profile/{user}/password', [ProfileController::class, 'updatePassword'])
+            ->middleware('can:update,user')
+            ->middleware('throttle:password-update')
+            ->name('client.profile.password.update');
         Route::get('/client/weather/current', [WeatherController::class, 'current'])
             ->name('client.weather.current');
         Route::get('/client/weather/forecast', [WeatherController::class, 'forecast'])

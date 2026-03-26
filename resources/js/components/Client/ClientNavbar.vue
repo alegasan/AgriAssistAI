@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useForm, usePage } from "@inertiajs/vue3"
 import { Link } from "@inertiajs/vue3"
-import { Bell, CircleCheckBig, Leaf } from "lucide-vue-next"
+import { CircleCheckBig, Leaf } from "lucide-vue-next"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { route } from "ziggy-js"
 import AlertDialog from "@/components/AlertDialog.vue"

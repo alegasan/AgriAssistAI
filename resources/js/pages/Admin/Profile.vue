@@ -7,7 +7,7 @@ import { route } from "ziggy-js";
 import AlertDialog from "@/components/AlertDialog.vue";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import AdminDashboard from "@/layouts/Admin/AdminDashboard.vue";
-import Transition from "@/components/Transition.vue";
+
 
 const props = defineProps<{ user?: Record<string, any> }>();
 const page = usePage();
@@ -72,19 +72,6 @@ watch(
     },
     { immediate: true },
 );
-const onFileChange = (event: Event): void => {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0] ?? null;
-
-    uploadForm.clearErrors("avatar");
-
-    if (!file) {
-        uploadForm.avatar = null;
-        clearLocalPreview();
-
-        return;
-    }
-
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
@@ -97,7 +84,6 @@ const onFileChange = (event: Event): void => {
     if (!file) {
         uploadForm.avatar = null;
         clearLocalPreview();
-
         return;
     }
 
@@ -105,7 +91,6 @@ const onFileChange = (event: Event): void => {
         uploadForm.avatar = null;
         clearLocalPreview();
         uploadForm.setError("avatar", "Please choose a PNG, JPG, or WEBP image.");
-
         return;
     }
 
@@ -113,14 +98,13 @@ const onFileChange = (event: Event): void => {
         uploadForm.avatar = null;
         clearLocalPreview();
         uploadForm.setError("avatar", "File size must be under 2MB.");
-
         return;
     }
 
     uploadForm.avatar = file;
     clearLocalPreview();
     localPreviewUrl.value = URL.createObjectURL(file);
-};};
+};
 
 const triggerFilePicker = (): void => {
     if (uploadForm.processing) {

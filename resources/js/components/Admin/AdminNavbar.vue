@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useForm } from "@inertiajs/vue3";
+import { useForm, usePage } from "@inertiajs/vue3";
 import { Link } from "@inertiajs/vue3"
 import { Leaf } from "lucide-vue-next"
+import { computed, ref, watch } from "vue";
 import { route } from "ziggy-js";
 import AlertDialog from "@/components/AlertDialog.vue"
 const navItems = [
@@ -15,6 +16,28 @@ const logoutForm = useForm()
 const handleLogout = () => {
     logoutForm.post(route('logout'))
 }
+
+const page = usePage()
+const userAvatarUrl = computed(() => {
+    const avatar = page.props.auth.user.avatar
+
+    if (typeof avatar !== 'string' || avatar.trim() === '') {
+        return ''
+    }
+
+    return route('admin.profile.avatar.show')
+})
+const userInitial = computed(() => {
+    const name = String(page.props.auth.user.name ?? '').trim()
+
+    return name ? name.charAt(0).toUpperCase() : 'A'
+})
+
+const avatarLoadError = ref(false)
+
+watch(userAvatarUrl, () => {
+    avatarLoadError.value = false
+})
 </script>
 
 <template>
@@ -40,12 +63,23 @@ const handleLogout = () => {
             <div class="flex items-center gap-3">
            
 
-                <div class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 shadow-sm">
-                    <div class="grid h-8 w-8 place-items-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
-                        A
+                <Link
+                    :href="route('admin.profile.show')"
+                    class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 shadow-sm"
+                >
+                    <div class="grid h-8 w-8 place-items-center overflow-hidden rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+                        <img
+                            v-if="userAvatarUrl && !avatarLoadError"
+                            :src="userAvatarUrl"
+                            alt="User avatar"
+                            class="h-full w-full object-cover"
+                            @error="avatarLoadError = true"
+                            @load="avatarLoadError = false"
+                        />
+                        <span v-else>{{ userInitial }}</span>
                     </div>
-                    <p class="text-sm font-semibold text-slate-900">Admin User</p>
-                </div>
+                    <p class="text-sm font-semibold text-slate-900">{{ page.props.auth.user.name }}</p>
+                </Link>
 
                 <AlertDialog
                     title="Confirm logout"

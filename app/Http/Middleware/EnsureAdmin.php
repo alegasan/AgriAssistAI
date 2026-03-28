@@ -15,8 +15,9 @@ class EnsureAdmin
     {
         $user = $request->user();
 
+
         if (! $user || ! $user->isAdmin()) {
-            return redirect()->route('client.dashboard');
+            abort(403);
         }
 
         return $next($request);

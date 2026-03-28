@@ -1,3 +1,7 @@
+---
+name: inertia-vue-development
+description: Laravel + Inertia + Vue Best Practices Guide
+
 # Laravel + Inertia + Vue Best Practices Guide
 
 ---

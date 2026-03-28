@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialAuthController;
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DiagnosesController;
 use App\Http\Controllers\Admin\DiseasesController;
@@ -47,6 +48,17 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('admin.dashboard');
+
+        Route::get('/admin/profile', [AdminProfileController::class, 'show'])
+            ->name('admin.profile.show');
+
+        Route::get('/admin/profile/avatar', [AdminProfileController::class, 'avatar'])
+            ->name('admin.profile.avatar.show');
+        Route::post('/admin/profile/avatar', [AdminProfileController::class, 'uploadAvatar'])
+            ->name('admin.profile.avatar.upload');
+        Route::put('/admin/profile/password', [AdminProfileController::class, 'updatePassword'])
+            ->middleware('throttle:password-update')
+            ->name('admin.profile.password.update');
         Route::get('/admin/users', [UserController::class, 'index'])
             ->name('admin.users.index');
         Route::patch('/admin/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])

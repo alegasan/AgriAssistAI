@@ -16,13 +16,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProfileController extends Controller
 {
-
     public function show(Request $request)
     {
         $user = $request->user();
-        abort_unless($user && $user->isAdmin(), 403);
 
-        $avatar = $user?->getRawOriginal('avatar');
+        $avatar = $user->getRawOriginal('avatar');
         $avatarUrl = null;
 
         if (is_string($avatar) && $avatar !== '') {
@@ -38,17 +36,18 @@ class ProfileController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'username' => $user->username,
+                'created_at_formatted' => $user->created_at->format('F j, Y'),
                 'avatar_url' => $avatarUrl,
             ],
-        ]);    }
-
+        ]);
+    }
 
     public function avatar(Request $request): StreamedResponse|RedirectResponse|Response
     {
         $user = $request->user();
-        abort_unless($user && $user->isAdmin(), 403);
 
-        $avatar = $user?->getRawOriginal('avatar');
+        $avatar = $user->getRawOriginal('avatar');
 
         if (! is_string($avatar) || $avatar === '') {
             abort(404);
@@ -63,28 +62,24 @@ class ProfileController extends Controller
 
         abort_unless($storage->exists($avatar), 404);
 
-        $filename = basename($avatar);
-        $mimeType = $storage->mimeType($avatar) ?: 'application/octet-stream';
         return $storage->response($avatar, null, [
             'Cache-Control' => 'private, max-age=300',
             'X-Content-Type-Options' => 'nosniff',
-        ]);   
+        ]);
     }
-
 
     public function uploadAvatar(ProfileAvatarUploadRequest $request): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($user && $user->isAdmin(), 403);
 
         $disk = 'public';
-        $oldAvatar = $user?->getRawOriginal('avatar');
+        $oldAvatar = $user->getRawOriginal('avatar');
 
         $path = $request->file('avatar')->store("avatars/{$user->id}", $disk);
 
         if (! is_string($path) || $path === '') {
             Log::error('Admin avatar upload failed: store() did not return a valid path.', [
-                'user_id' => $user?->id,
+                'user_id' => $user->id,
                 'disk' => $disk,
             ]);
 
@@ -95,17 +90,14 @@ class ProfileController extends Controller
             Storage::disk($disk)->delete($oldAvatar);
         }
 
-        $user->update([
-            'avatar' => $path,
-        ]);
+        $user->update(['avatar' => $path]);
 
         return back()->with('success', 'Profile photo updated successfully.');
     }
-    
+
     public function updatePassword(ProfilePasswordUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($user && $user->isAdmin(), 403);
 
         $user->update([
             'password' => Hash::make($request->validated('password')),

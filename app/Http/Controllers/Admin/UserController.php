@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Enums\ActivityAction;
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\User;
 
 class UserController extends Controller
 {
@@ -35,8 +35,8 @@ class UserController extends Controller
                         ->orWhere('username', 'like', $pattern);
                 });
             })
-            ->when($status === 'active', fn($query) => $query->where('is_active', true))
-            ->when($status === 'inactive', fn($query) => $query->where('is_active', false))
+            ->when($status === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($status === 'inactive', fn ($query) => $query->where('is_active', false))
             ->latest('created_at')
             ->get();
 
@@ -51,13 +51,11 @@ class UserController extends Controller
 
     public function toggleStatus(Request $request, User $user, ActivityLogger $activityLogger)
     {
-        $this->authorize('toggleStatus', $user);
-
         if ($user->isAdmin()) {
             return response()->json(['message' => 'Cannot change status of admin users.'], 403);
         }
 
-        $user->is_active = !$user->is_active;
+        $user->is_active = ! $user->is_active;
         $user->save();
 
         $activityLogger->log(

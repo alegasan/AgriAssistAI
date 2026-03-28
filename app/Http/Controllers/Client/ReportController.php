@@ -54,8 +54,6 @@ class ReportController extends Controller
 
     public function destroy(Diagnosis $diagnosis, DiagnosisImageService $imageService): RedirectResponse
     {
-        $this->authorize('delete', $diagnosis);
-
         $imageService->delete($diagnosis);
         $diagnosis->delete();
 

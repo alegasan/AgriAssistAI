@@ -51,7 +51,6 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/profile', [AdminProfileController::class, 'show'])
             ->name('admin.profile.show');
-
         Route::get('/admin/profile/avatar', [AdminProfileController::class, 'avatar'])
             ->name('admin.profile.avatar.show');
         Route::post('/admin/profile/avatar', [AdminProfileController::class, 'uploadAvatar'])

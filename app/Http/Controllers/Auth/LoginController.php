@@ -19,36 +19,35 @@ class LoginController extends Controller
         $credentials = $request->validated();
         $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        if (auth()->attempt([$loginField => $credentials['login'], 'password' => $credentials['password']])) {
-            $request->session()->regenerate();
-            $user = auth()->user();
-
-            if (! $user->is_active) {
-                auth()->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return back()->withErrors([
-                    'login' => 'Your account has been deactivated. Please contact support.',
-                ])->onlyInput('login');
-            }
-
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard');
-            }
-
-            return redirect()->route('client.dashboard');
+        if (! auth()->attempt([$loginField => $credentials['login'], 'password' => $credentials['password']])) {
+            return back()->withErrors([
+                'login' => 'The provided credentials do not match our records.',
+            ])->onlyInput('login');
         }
 
-        return back()->withErrors([
-            'login' => 'The provided credentials do not match our records.',
-        ])->onlyInput('login');
+        $request->session()->regenerate();
+        $user = auth()->user();
+
+        if (! $user->is_active) {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'login' => 'The provided credentials do not match our records.',
+            ])->onlyInput('login');
+        }
+
+        return $user->isAdmin()
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('client.dashboard');
     }
 
     public function logout(Request $request)
     {
         auth()->logout();
-        session()->invalidate();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect()->route('login');
     }

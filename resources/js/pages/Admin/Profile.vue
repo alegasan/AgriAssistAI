@@ -72,7 +72,7 @@ watch(
     },
     { immediate: true },
 );
-const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const onFileChange = (event: Event): void => {

@@ -18,7 +18,7 @@ it('blocks login for deactivated users', function () {
         ])
         ->assertRedirect(route('login'))
         ->assertSessionHasErrors([
-            'login' => 'Your account has been deactivated. Please contact support.',
+            'login' => 'The provided credentials do not match our records.',
         ]);
 
     $this->assertGuest();

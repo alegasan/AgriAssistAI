@@ -32,15 +32,19 @@ class ProfileController extends Controller
 
         return Inertia::render('Client/ProfileTab/Show', [
             'user' => [
-                ...$user->toArray(),
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'username' => $user->username,
+                'created_at_formatted' => $user->created_at->format('F j, Y'),
                 'avatar_url' => $avatarUrl,
+                'provider' => $user->provider,
             ],
         ]);
     }
 
     public function avatar(Request $request, User $user): StreamedResponse|RedirectResponse|Response
     {
-        abort_unless($request->user()?->is($user), 403);
 
         $avatar = $user->getRawOriginal('avatar');
 
@@ -70,7 +74,6 @@ class ProfileController extends Controller
 
     public function uploadAvatar(ProfileAvatarUploadRequest $request, User $user): RedirectResponse
     {
-        abort_unless($request->user()?->is($user), 403);
 
         $disk = 'public';
         $oldAvatar = $user->getRawOriginal('avatar');
@@ -99,7 +102,6 @@ class ProfileController extends Controller
 
     public function updatePassword(ProfilePasswordUpdateRequest $request, User $user): RedirectResponse
     {
-        abort_unless($request->user()?->is($user), 403);
 
         $user->update([
             'password' => Hash::make($request->validated('password')),

@@ -114,7 +114,7 @@ function activityBadgeClasses(iconKey: string) {
                 </div>
 
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div class="space-y-0 divide-y divide-slate-100">
+                    <div class="space-y-0 divide-y divide-slate-100 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-200 scrollbar-track-slate-50">
                         <template v-if="recentActivity?.length">
                             <div v-for="item in recentActivity" :key="item.id" class="flex items-center gap-4 px-5 py-4">
                                 <div

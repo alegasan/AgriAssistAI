@@ -109,12 +109,12 @@ const submit = () => {
                 <div class="flex flex-col gap-1.5">
                   <div class="flex items-center">
                     <Label for="password" class="text-slate-700">Password</Label>
-                    <a
-                      href="#"
+                    <Link
+                      :href="route('password.request')"
                       class="ml-auto inline-block text-sm font-medium text-emerald-700 underline-offset-4 hover:underline"
                     >
                       Forgot your password?
-                    </a>
+                    </Link>
                   </div>
                   <div class="relative">
                     <Input

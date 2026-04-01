@@ -18,8 +18,17 @@ use App\Http\Controllers\Client\SupportController;
 use App\Http\Controllers\Client\KnowledgeHubController;
 use App\Http\Controllers\Client\ProfileController;
 
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
+
 
 Route::inertia('/', 'Welcome')->name('home');
+
+// Forgot Password & Reset Password
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
     Route::get('/login', [LoginController::class, 'showLoginForm'])

@@ -1,12 +1,12 @@
 # AgriAssistAI 
 
->  **This project is currently under active development.**
+>  **This project is now complete.**
 
 ## About
 AgriAssistAI is an intelligent plant health monitoring and disease diagnosis system. It leverages AI to analyze plant images and provide real-time health assessments, helping gardeners and farmers identify plant diseases and receive actionable care recommendations.
 
 ## Status
- Work in Progress — features may be incomplete or change at any time.
+ Completed — all planned features have been delivered.
 
 ## Tech Stack
 - **Backend**: Laravel (PHP 8+)

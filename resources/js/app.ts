@@ -15,9 +15,14 @@ createInertiaApp({
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
+        const ziggy = props.initialPage.props.ziggy as any;
+
         createApp({ render: () => h(App, props) })
             .use(plugin)
-            .use(ZiggyVue)
+            .use(ZiggyVue, {
+                ...ziggy,
+                url: window.location.origin,
+            })
             .mount(el);
     },
     progress: {

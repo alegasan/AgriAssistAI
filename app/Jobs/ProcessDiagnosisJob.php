@@ -9,6 +9,7 @@ use App\Services\ActivityLogger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ProcessDiagnosisJob implements ShouldQueue
 {
@@ -66,6 +67,17 @@ class ProcessDiagnosisJob implements ShouldQueue
         try {
             $diagnoseService->completeDiagnosis($diagnosis);
         } catch (\Throwable $exception) {
+            Log::channel('stderr')->error('ProcessDiagnosisJob failed in handle()', [
+                'diagnosis_id' => $diagnosis->id,
+                'user_id' => $diagnosis->user_id,
+                'attempt' => $this->attempts(),
+                'exception_class' => get_class($exception),
+                'exception_message' => $exception->getMessage(),
+                'exception_file' => $exception->getFile(),
+                'exception_line' => $exception->getLine(),
+                'stack_trace' => $exception->getTraceAsString(),
+            ]);
+
             report($exception);
 
             $diagnosis->update([
@@ -92,6 +104,15 @@ class ProcessDiagnosisJob implements ShouldQueue
 
     public function failed(?\Throwable $exception): void
     {
+        Log::channel('stderr')->error('ProcessDiagnosisJob permanently failed', [
+            'diagnosis_id' => $this->diagnosisId,
+            'exception_class' => $exception ? get_class($exception) : null,
+            'exception_message' => $exception?->getMessage(),
+            'exception_file' => $exception?->getFile(),
+            'exception_line' => $exception?->getLine(),
+            'stack_trace' => $exception?->getTraceAsString(),
+        ]);
+
         $updated = Diagnosis::query()
             ->where('id', $this->diagnosisId)
             ->whereNotIn('status', [Diagnosis::STATUS_COMPLETED, Diagnosis::STATUS_FAILED])
